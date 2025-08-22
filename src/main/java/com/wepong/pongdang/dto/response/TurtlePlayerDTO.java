@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TurtlePlayerDTO {
-    private String userUid;
+    private Long userId;
     private String nickname;
-    private String roomUid;
+    private Long roomId;
     private boolean isReady;
     private String turtleId;
-    private int bettingPoint;
+    private int entryFee;
 }

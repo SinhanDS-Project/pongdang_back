@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -44,9 +43,9 @@ public class GameRoomService {
 
 		Page<GameRoomResponseDTO.GameRoomDetailDTO> details = roomlist
 				.map(room -> {
-					GameLevelEntity level = gameLevelService.selectByLevelUid(room.getGameLevelEntity().getUid());
-					GameEntity gameEntity = level != null ? gameService.selectById(level.getGameEntity().getUid()) : null;
-					int count = playerDAO.getAll(room.getUid()) != null ? playerDAO.getAll(room.getUid()).size() : 0;
+					GameLevelEntity level = gameLevelService.selectByLevelUid(room.getGameLevel().getId());
+					GameEntity gameEntity = level != null ? gameService.selectById(level.getGame().getId()) : null;
+					int count = playerDAO.getAll(room.getId()) != null ? playerDAO.getAll(room.getId()).size() : 0;
 
 					return GameRoomResponseDTO.GameRoomDetailDTO.from(room, count);
 				});
@@ -58,16 +57,16 @@ public class GameRoomService {
 		return gameRoomRepository.findAll();
 	}
 
-	public GameRoomResponseDTO.GameRoomDetailDTO selectById(String roomId) {
+	public GameRoomResponseDTO.GameRoomDetailDTO selectById(Long roomId) {
 		GameRoomEntity room = gameRoomRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("해당 게임방이 존재하지 않습니다"));
 
 		if (room != null) {
-			GameLevelEntity level = gameLevelService.selectByLevelUid(room.getGameLevelEntity().getUid());
+			GameLevelEntity level = gameLevelService.selectByLevelUid(room.getGameLevel().getId());
 			if (level != null) {
-				GameEntity gameEntity = gameService.selectById(level.getGameEntity().getUid());
+				GameEntity gameEntity = gameService.selectById(level.getGame().getId());
 				if (gameEntity != null) {
-					int count = playerDAO.getAll(room.getUid()) != null
-							? playerDAO.getAll(room.getUid()).size()
+					int count = playerDAO.getAll(room.getId()) != null
+							? playerDAO.getAll(room.getId()).size()
 							: 0;
 
 					return GameRoomResponseDTO.GameRoomDetailDTO.from(room, count);
@@ -77,17 +76,14 @@ public class GameRoomService {
 		return null;
 	}
 
-	public void insertRoom(GameRoomRequestDTO.InsertGameRoomRequestDTO roomRequest, String userId) {
-		String uid = UUID.randomUUID().toString().replace("-", "");
-		UserEntity userEntity = authService.findByUid(userId);
-		GameLevelEntity level = gameLevelService.selectByLevelUid(roomRequest.getGameLevelUid());
+	public void insertRoom(GameRoomRequestDTO.InsertGameRoomRequestDTO roomRequest, Long userId) {
+		UserEntity userEntity = authService.findById(userId);
+		GameLevelEntity level = gameLevelService.selectByLevelUid(roomRequest.getGameLevelId());
 
 		GameRoomEntity room = GameRoomEntity.builder()
-				.uid(uid)
 				.title(roomRequest.getTitle())
-				.minBet(roomRequest.getMinBet())
-				.userEntity(userEntity)
-				.gameLevelEntity(level)
+				.user(userEntity)
+				.gameLevel(level)
 				.status(GameRoomStatus.WAITING)
 				.build();
 
@@ -102,7 +98,7 @@ public class GameRoomService {
 //		}
 //	}
 
-	public void deleteRoom(String roomId) {
+	public void deleteRoom(Long roomId) {
 		GameRoomEntity room = gameRoomRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("해당 게임방이 존재하지 않습니다"));
 		// 게임방 존재 여부
 		if (room != null) {
@@ -110,16 +106,16 @@ public class GameRoomService {
 		}
 	}
 
-	public void updateStatus(String roomId, GameRoomStatus status) {
+	public void updateStatus(Long roomId, GameRoomStatus status) {
 		GameRoomEntity room = gameRoomRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("해당 게임방이 존재하지 않습니다"));
 		room.updateStatus(status);
 
 		gameRoomRepository.save(room);
 	}
 
-	public void updateHost(String roomId, String hostId) {
+	public void updateHost(Long roomId, Long hostId) {
 		GameRoomEntity room = gameRoomRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("해당 게임방이 존재하지 않습니다"));
-		UserEntity userEntity = authService.findByUid(hostId);
+		UserEntity userEntity = authService.findById(hostId);
 
 		room.updateHost(userEntity);
 

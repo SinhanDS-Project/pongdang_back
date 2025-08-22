@@ -28,19 +28,19 @@ public class JWTUtil {
 		this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public String generateAccessToken(String userId) {
+	public String generateAccessToken(Long userId) {
 		return buildToken(userId, accessTokenExpiration);
 	}
 
-	public String generateRefreshToken(String userId) {
+	public String generateRefreshToken(Long userId) {
 		return buildToken(userId, refreshTokenExpiration);
 	}
 
-	private String buildToken(String userId, long expiration) {
+	private String buildToken(Long userId, long expiration) {
 		Date now = new Date();
 		Date expiryDate = new Date(now.getTime() + expiration);
 
-		return Jwts.builder().setSubject(userId).setIssuedAt(now).setExpiration(expiryDate)
+		return Jwts.builder().setSubject(String.valueOf(userId)).setIssuedAt(now).setExpiration(expiryDate)
 				.signWith(key, SignatureAlgorithm.HS256).compact();
 	}
 
@@ -67,7 +67,8 @@ public class JWTUtil {
 		}
 	}
 	//✅ userId (sub) 가져오기
-	public String getUserIdFromToken(String token) {
-		return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
+	public Long getUserIdFromToken(String token) {
+		return Long.parseLong(
+			Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject());
 	}
 }

@@ -30,19 +30,19 @@ public class GameLevelResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LevelDetailDTO {
-        private String uid;
+        private Long id;
         private Level level;
         private double probability;
         private double reward;
-        private String gameUid;
+        private Long gameId;
 
         public static LevelDetailDTO from(GameLevelEntity level) {
             return LevelDetailDTO.builder()
-                    .uid(level.getUid())
+                    .id(level.getId())
                     .level(level.getLevel())
-                    .reward(level.getReward())
+                    .reward(level.getEntryFee())
                     .probability(level.getProbability())
-                    .gameUid(level.getGameEntity().getUid())
+                    .gameId(level.getGame().getId())
                     .build();
         }
     }

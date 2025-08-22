@@ -4,7 +4,7 @@ import com.wepong.pongdang.dto.request.BoardRequestDTO.InsertBoardRequestDTO;
 import com.wepong.pongdang.dto.request.BoardRequestDTO.UpdateBoardRequestDTO;
 import com.wepong.pongdang.dto.response.BoardResponseDTO;
 import com.wepong.pongdang.entity.BoardEntity;
-import com.wepong.pongdang.entity.enums.Category;
+import com.wepong.pongdang.entity.enums.BoardType;
 import com.wepong.pongdang.model.aws.S3FileService;
 import com.wepong.pongdang.service.AuthService;
 import com.wepong.pongdang.service.BoardService;
@@ -34,7 +34,7 @@ public class BoardRestController {
 	// 게시글 리스트 조회, 페이징 (카테고리별)
 	@GetMapping("/boardlist")
 	public BoardResponseDTO.BoardListDTO list(@RequestParam(defaultValue = "1") int page,
-			@RequestParam(defaultValue = "FREE") Category category,
+			@RequestParam(defaultValue = "FREE") BoardType category,
 			@RequestParam(defaultValue = "createdAt") String sort) {
 
 		int offset = (page - 1) * PAGE_SIZE;
@@ -49,7 +49,7 @@ public class BoardRestController {
 
 	// 게시글 상세보기 시 조회수 증가
 	@GetMapping("/boarddetail/{boardId}")
-	public BoardResponseDTO.BoardDetailDTO getBoardDetail2(@PathVariable String boardId,
+	public BoardResponseDTO.BoardDetailDTO getBoardDetail2(@PathVariable Long boardId,
 			@RequestHeader(value = "Authorization", required = false, defaultValue="") String authHeader) {
 
 		// 조회수 증가
@@ -74,7 +74,7 @@ public class BoardRestController {
 	// 게시글 등록 (로그인한 사용자만 가능)
 	@PostMapping("/boardinsert")
 	public ResponseEntity<?> insertBoard(@RequestBody InsertBoardRequestDTO dto, @RequestHeader(value="Authorization", required=false,defaultValue="") String authHeader) {
-		String userId = authService.validateAndGetUserId(authHeader);
+		Long userId = authService.validateAndGetUserId(authHeader);
 
 		boardService.insertBoard(dto, userId);
 
@@ -83,9 +83,9 @@ public class BoardRestController {
 
 	// 게시글 수정 (로그인 && 본인 글만 가능)
 	@PutMapping("/boardupdate/{boardId}")
-	public ResponseEntity<?> updateBoard(@PathVariable String boardId, @RequestBody UpdateBoardRequestDTO dto,
+	public ResponseEntity<?> updateBoard(@PathVariable Long boardId, @RequestBody UpdateBoardRequestDTO dto,
 											  @RequestHeader(value="Authorization", required=false, defaultValue="") String authHeader) {
-		String userId = authService.validateAndGetUserId(authHeader);
+		Long userId = authService.validateAndGetUserId(authHeader);
 
 		boardService.updateBoard(boardId, dto, userId);
 
@@ -94,8 +94,8 @@ public class BoardRestController {
 
 	// 게시글 삭제 (로그인 && 본인 글만 가능)
 	@DeleteMapping("/boarddelete/{boardId}")
-	public ResponseEntity<?> deleteBoard(@PathVariable String boardId, @RequestHeader(value="Authorization", required=false) String authHeader) {
-		String userId = authService.validateAndGetUserId(authHeader);
+	public ResponseEntity<?> deleteBoard(@PathVariable Long boardId, @RequestHeader(value="Authorization", required=false) String authHeader) {
+		Long userId = authService.validateAndGetUserId(authHeader);
 
 		boardService.deleteBoard(boardId, userId);
 
@@ -104,7 +104,7 @@ public class BoardRestController {
 
 	// 좋아요 버튼 누를 시 호출
 	@PostMapping("/like/{boardId}")
-	public ResponseEntity<Void> incrementLike(@PathVariable String boardId) {
+	public ResponseEntity<Void> incrementLike(@PathVariable Long boardId) {
 		boardService.incrementLikeCount(boardId);
 		return ResponseEntity.ok().build();
 	}

@@ -1,6 +1,8 @@
 package com.wepong.pongdang.service;
 
 import com.wepong.pongdang.entity.ChatBotQAEntity;
+import com.wepong.pongdang.entity.enums.QAMainType;
+import com.wepong.pongdang.entity.enums.QASubType;
 import com.wepong.pongdang.repository.ChatQARepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,23 +21,23 @@ public class ChatQAService {
 		return chatQARepository.findAll();
 	}
 	
-	public List<String> subCatesByMainCate(String main_category) {
-		List<ChatBotQAEntity> chatList = chatQARepository.findByMainCategory(main_category);
+	public List<QASubType> subCatesByMainCate(QAMainType mainCategory) {
+		List<ChatBotQAEntity> chatList = chatQARepository.findByMainCategory(mainCategory);
 		return chatList.stream()
 				.map(ChatBotQAEntity::getSubCategory)
 				.toList();
 	}
 		
-	public List<ChatBotQAEntity> selectByMainSubCate(String main_category, String sub_category) {
-		return chatQARepository.findByMainCategoryAndSubCategory(main_category, sub_category);
+	public List<ChatBotQAEntity> selectByMainSubCate(QAMainType mainCategory, QASubType subCategory) {
+		return chatQARepository.findByMainCategoryAndSubCategory(mainCategory, subCategory);
 	}
 
-	public String answerByUid(String uid) {
-		ChatBotQAEntity chat = chatQARepository.findById(uid).orElseThrow(() -> new RuntimeException("질문이 존재하지 않습니다."));
+	public String answerByUid(Long id) {
+		ChatBotQAEntity chat = chatQARepository.findById(id).orElseThrow(() -> new RuntimeException("질문이 존재하지 않습니다."));
 		return chat.getAnswerText();
 	}
 	
-	public List<ChatBotQAEntity> selectByMainCate(String main_category) {
-		return chatQARepository.findByMainCategory(main_category);
+	public List<ChatBotQAEntity> selectByMainCate(QAMainType mainCategory) {
+		return chatQARepository.findByMainCategory(mainCategory);
 	}
 }

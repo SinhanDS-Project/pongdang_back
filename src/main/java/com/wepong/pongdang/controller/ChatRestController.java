@@ -2,6 +2,8 @@ package com.wepong.pongdang.controller;
 
 import com.wepong.pongdang.dto.response.ChatQAResponseDTO;
 import com.wepong.pongdang.entity.ChatBotQAEntity;
+import com.wepong.pongdang.entity.enums.QAMainType;
+import com.wepong.pongdang.entity.enums.QASubType;
 import com.wepong.pongdang.service.ChatQAService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,16 +33,16 @@ public class ChatRestController {
 
     // ✅ 메인 카테고리에 따른 서브 카테고리 목록 반환
     @GetMapping(value = "/subcategories/{main_category}", produces = "application/json;charset=UTF-8")
-    public List<String> getSubCategoriesByMain(@PathVariable("main_category") String main_category) {
-        return chatService.subCatesByMainCate(main_category.trim());
+    public List<QASubType> getSubCategoriesByMain(@PathVariable("main_category") QAMainType mainCategory) {
+        return chatService.subCatesByMainCate(mainCategory);
     }
 
     // ✅ 메인+서브 카테고리에 따른 질문 목록 반환
     @GetMapping(value = "/questions/{main_category}/{sub_category}", produces = "application/json;charset=UTF-8")
     public ChatQAResponseDTO.ChatQAListDTO getQuestionsByMainAndSub(
-    		@PathVariable("main_category") String main_category,
-    		@PathVariable("sub_category") String sub_category) {
-        List<ChatBotQAEntity> list = chatService.selectByMainSubCate(main_category.trim(), sub_category.trim());
+    		@PathVariable("main_category") QAMainType mainCategory,
+    		@PathVariable("sub_category") QASubType subCategory) {
+        List<ChatBotQAEntity> list = chatService.selectByMainSubCate(mainCategory, subCategory);
         List<ChatQAResponseDTO.ChatQADetailDTO> details = list.stream()
                 .map(ChatQAResponseDTO.ChatQADetailDTO::from)
                 .collect(Collectors.toList());
@@ -49,14 +51,14 @@ public class ChatRestController {
 
     // ✅ UID로 답변만 조회
     @GetMapping(value = "/answer/{uid}", produces = "text/plain;charset=UTF-8")
-    public String getAnswerByUid(@PathVariable("uid") String uid) {
+    public String getAnswerByUid(@PathVariable("uid") Long uid) {
         return chatService.answerByUid(uid);
     }
 
     // ✅ 메인 카테고리로 질문 목록 조회 (서브 구분 없음)
     @GetMapping(value = "/questionsByMain/{main_category}", produces = "application/json;charset=UTF-8")
-    public ChatQAResponseDTO.ChatQAListDTO getQuestionsByMainCategory(@PathVariable("main_category") String main_category) {
-        List<ChatBotQAEntity> list = chatService.selectByMainCate(main_category.trim());
+    public ChatQAResponseDTO.ChatQAListDTO getQuestionsByMainCategory(@PathVariable("main_category") QAMainType mainCategory) {
+        List<ChatBotQAEntity> list = chatService.selectByMainCate(mainCategory);
         List<ChatQAResponseDTO.ChatQADetailDTO> details = list.stream()
                 .map(ChatQAResponseDTO.ChatQADetailDTO::from)
                 .collect(Collectors.toList());

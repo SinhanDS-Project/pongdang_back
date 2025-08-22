@@ -1,6 +1,8 @@
 package com.wepong.pongdang.repository;
 
 import com.wepong.pongdang.entity.ChatLogsEntity;
+import com.wepong.pongdang.entity.UserEntity;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,10 +11,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ChatLogRepository extends JpaRepository<ChatLogsEntity, String> {
-    int countByUserUid(String userId);
+public interface ChatLogRepository extends JpaRepository<ChatLogsEntity, Long> {
+    int countByUserId(Long userId);
 
-    List<ChatLogsEntity> findByUserUid(String userUid);
+    List<ChatLogsEntity> findByUserId(Long userId);
 
-    Page<ChatLogsEntity> findByUserUid(String userUid, Pageable pageable);
+    Page<ChatLogsEntity> findByUserId(Long userId, Pageable pageable);
+
+    Long user(UserEntity user);
 }

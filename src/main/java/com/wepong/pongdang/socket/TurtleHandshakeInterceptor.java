@@ -34,13 +34,13 @@ public class TurtleHandshakeInterceptor implements HandshakeInterceptor {
 
             // 마지막 경로 부분만 추출
             String[] parts = requestURI.split("/");
-            String roomId = parts[parts.length - 1];
+            Long roomId = Long.valueOf(parts[parts.length - 1]);
 
             attributes.put("roomId", roomId);
 
          // 토큰 추출
             String authHeader = "Bearer " + servletRequest.getParameter("token");
-            String userId = authService.validateAndGetUserId(authHeader);
+            Long userId = authService.validateAndGetUserId(authHeader);
 
             attributes.put("userId", userId);
         }

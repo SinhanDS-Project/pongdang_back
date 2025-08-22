@@ -177,7 +177,7 @@ public class AuthRestController {
 
 	@DeleteMapping("/logout")
 	public void logout(HttpServletResponse response, @RequestHeader("Authorization") String authHeader) {
-		String userId = authService.validateAndGetUserId(authHeader);
+		Long userId = authService.validateAndGetUserId(authHeader);
 		authService.logout(userId);
 
 		ResponseCookie cookie = ResponseCookie.from("refreshToken", "")

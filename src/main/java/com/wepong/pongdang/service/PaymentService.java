@@ -25,7 +25,6 @@ import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +40,7 @@ public class PaymentService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public PaymentEntity confirmPayment(PaymentConfirmDTO response, String userId) throws Exception {
+    public PaymentEntity confirmPayment(PaymentConfirmDTO response, Long userId) throws Exception {
 //        PaymentDTO payment = paymentDAO.selectByOrderId(response.getOrder_uid());
 //
 //        if(payment == null) {
@@ -72,14 +71,13 @@ public class PaymentService {
         String receipt_url = null;
         Date approve_at = null;
 
-        UserEntity userEntity = authService.findByUid(userId);
+        UserEntity userEntity = authService.findById(userId);
 
         PaymentEntity.PaymentEntityBuilder builder = PaymentEntity.builder()
-                .uid(UUID.randomUUID().toString().replace("-", ""))
                 .paymentKey(response.getPaymentKey())
                 .orderUid(response.getOrderUid())
                 .amount(response.getAmount())
-                .userEntity(userEntity);
+                .user(userEntity);
 
         try {
             ResponseEntity<String> confirm = restTemplate.postForEntity(

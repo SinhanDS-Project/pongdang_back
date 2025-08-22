@@ -41,10 +41,10 @@ public class GameRoomWebSocketHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		// 연결된 세션 저장, 초기 데이터 전송 등
-		String userId = (String) session.getAttributes().get("userId");
-		String roomId = (String) session.getAttributes().get("roomId");
+		Long userId = (Long) session.getAttributes().get("userId");
+		Long roomId = (Long) session.getAttributes().get("roomId");
 
-		UserEntity userEntity = authService.findByUid(userId);
+		UserEntity userEntity = authService.findById(userId);
 		GameRoomResponseDTO.GameRoomDetailDTO gameroom = gameRoomService.selectById(roomId);
 
 		if(roomId == null || userId == null) {
@@ -58,7 +58,7 @@ public class GameRoomWebSocketHandler extends TextWebSocketHandler {
 		if(players != null) {
 			// 중복 입장 검사
 			for(TurtlePlayerDTO player : players) {
-				if(player.getUserUid().equals(userId)) {
+				if(player.getUserId().equals(userId)) {
 					sessionService.removeSession(roomId, userId);
 					break;
 				}
@@ -73,11 +73,11 @@ public class GameRoomWebSocketHandler extends TextWebSocketHandler {
 		if(existingPlayer == null) {
 			// 플레이어 추가
 			TurtlePlayerDTO player = TurtlePlayerDTO.builder()
-				.userUid(userId)
+				.userId(userId)
 				.nickname(userEntity.getNickname())
-				.roomUid(roomId)
+				.roomId(roomId)
 				.isReady(false)
-				.bettingPoint(gameroom.getMinBet())
+				.entryFee(gameroom.getEntryFee())
 				.build();
 
 			playerDAO.addPlayer(roomId, player);
@@ -90,7 +90,7 @@ public class GameRoomWebSocketHandler extends TextWebSocketHandler {
 		broadcastMessage("enter", roomId, data);
 	}
 	
-	private void broadcastMessage(String type, String roomId, Map<String, Object> data) throws IOException {
+	private void broadcastMessage(String type, Long roomId, Map<String, Object> data) throws IOException {
 		// 웹소켓 메시지 전송
 		List<WebSocketSession> sessions = sessionService.getSessions(roomId);
 		List<TurtlePlayerDTO> players = playerDAO.getAll(roomId);
@@ -131,8 +131,8 @@ public class GameRoomWebSocketHandler extends TextWebSocketHandler {
 
 		String type = json.get("type").asText();
 
-		String roomId = (String) session.getAttributes().get("roomId");
-		String userId = (String) session.getAttributes().get("userId");
+		Long roomId = (Long) session.getAttributes().get("roomId");
+		Long userId = (Long) session.getAttributes().get("userId");
 
 		TurtlePlayerDTO player = playerDAO.getPlayer(roomId, userId);
 
@@ -144,7 +144,7 @@ public class GameRoomWebSocketHandler extends TextWebSocketHandler {
 				break;
 			case "betting":
 				int bettingPoint = json.get("betting_point").asInt();
-				player.setBettingPoint(bettingPoint);
+				player.setEntryFee(bettingPoint);
 				break;
 			case "ready":
 				Boolean isReady = json.get("isReady").asBoolean();
@@ -166,12 +166,12 @@ public class GameRoomWebSocketHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 		// 세션 제거, 퇴장 처리 등
-		String roomId = (String) session.getAttributes().get("roomId");
-		String userId = (String) session.getAttributes().get("userId");
+		Long roomId = (Long) session.getAttributes().get("roomId");
+		Long userId = (Long) session.getAttributes().get("userId");
 
 		sessionService.removeSession(roomId, session);
 
-		UserEntity userEntity = authService.findByUid(userId);
+		UserEntity userEntity = authService.findById(userId);
 
 		GameRoomResponseDTO.GameRoomDetailDTO gameroom = gameRoomService.selectById(roomId);
 		GameRoomStatus gameStatus = gameroom.getStatus();
@@ -181,12 +181,12 @@ public class GameRoomWebSocketHandler extends TextWebSocketHandler {
 		if(!gameStatus.equals(GameRoomStatus.PLAYING)) {
 			playerDAO.removePlayer(roomId, userId);
 
-			if(userId.equals(gameroom.getHostUid())) {
+			if(userId.equals(gameroom.getHostId())) {
 				List<TurtlePlayerDTO> players = playerDAO.getAll(roomId);
 
 				if(players != null && !players.isEmpty()) {
-					gameRoomService.updateHost(roomId, players.get(0).getUserUid());
-					data.put("hostId", players.get(0).getUserUid());
+					gameRoomService.updateHost(roomId, players.get(0).getUserId());
+					data.put("hostId", players.get(0).getUserId());
 				} else {
 					// 플레이어가 0명일 때 방 삭제
 					gameRoomService.deleteRoom(roomId);

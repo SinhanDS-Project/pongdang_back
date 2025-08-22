@@ -12,13 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class SessionService {
-    private final Map<String, List<WebSocketSession>> roomSessions = new ConcurrentHashMap<>();
+    private final Map<Long, List<WebSocketSession>> roomSessions = new ConcurrentHashMap<>();
 
-    public void addSession(String roomId, WebSocketSession session) {
+    public void addSession(Long roomId, WebSocketSession session) {
         roomSessions.computeIfAbsent(roomId, k -> new ArrayList<>()).add(session);
     }
 
-    public void removeSession(String roomId, WebSocketSession session) {
+    public void removeSession(Long roomId, WebSocketSession session) {
         List<WebSocketSession> sessions = roomSessions.get(roomId);
         if(sessions != null) {
             sessions.remove(session);
@@ -28,11 +28,11 @@ public class SessionService {
         }
     }
 
-    public void removeSession(String roomId, String userId) {
+    public void removeSession(Long roomId, Long userId) {
         List<WebSocketSession> sessions = roomSessions.get(roomId);
         if(sessions != null) {
             sessions.removeIf(session -> {
-                String sessionUserId = (String) session.getAttributes().get("userId");
+                Long sessionUserId = (Long) session.getAttributes().get("userId");
                 if (userId.equals(sessionUserId)) {
                     if (session.isOpen()) {
                         try {
@@ -51,11 +51,11 @@ public class SessionService {
         }
     }
 
-    public WebSocketSession getSession(String roomId, String userId) {
+    public WebSocketSession getSession(Long roomId, Long userId) {
         List<WebSocketSession> sessions = roomSessions.get(roomId);
         if(sessions != null) {
             for(WebSocketSession session : sessions) {
-                String sessionUserId = (String) session.getAttributes().get("userId");
+                Long sessionUserId = (Long) session.getAttributes().get("userId");
                 if(userId.equals(sessionUserId)) {
                     return session;
                 }
@@ -66,7 +66,7 @@ public class SessionService {
 
     // 현재 게임방의 세션 리스트
     // 웹소켓 메시지 전송용
-    public List<WebSocketSession> getSessions(String roomId) {
+    public List<WebSocketSession> getSessions(Long roomId) {
         return roomSessions.get(roomId);
     }
 }

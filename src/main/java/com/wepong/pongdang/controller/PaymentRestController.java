@@ -7,6 +7,8 @@ import com.wepong.pongdang.entity.enums.PaymentStatus;
 import com.wepong.pongdang.service.AuthService;
 import com.wepong.pongdang.service.HistoryService;
 import com.wepong.pongdang.service.PaymentService;
+import com.wepong.pongdang.service.WalletService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,16 +24,18 @@ public class PaymentRestController {
 
     @Autowired
     private HistoryService historyService;
+	@Autowired
+	private WalletService walletService;
 
     @PostMapping("/confirm")
     public PaymentResponseDTO confirmPayment(@RequestBody PaymentConfirmDTO response,
                                              @RequestHeader("Authorization") String authHeader) throws Exception {
-        String userId = authService.validateAndGetUserId(authHeader);
+        Long userId = authService.validateAndGetUserId(authHeader);
         PaymentEntity paymentEntity = paymentService.confirmPayment(response, userId);
 
         if(paymentEntity.getStatus().equals(PaymentStatus.PAID)) {
             int netPoint = (int) Math.round(paymentEntity.getAmount() / 1.1);
-            authService.addPoint(netPoint, userId);
+            walletService.addPong(netPoint, userId);
             historyService.insertPointHistory(userId, netPoint);
         }
 

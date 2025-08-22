@@ -27,7 +27,7 @@ public class ChatLogRestController {
     public ChatLogResponseDTO.ChatLogListDTO getLogsByUserWithPaging(
 										@RequestHeader("Authorization") String authHeader,
 										@RequestParam(defaultValue = "1") int page) {
-    	String userId = authService.validateAndGetUserId(authHeader);
+		Long userId = authService.validateAndGetUserId(authHeader);
     	Page<ChatLogsEntity> list = chatLogService.selectByUser(userId, page);
     	int totalCount = chatLogService.chatlogCount(userId);
 		Page<ChatLogResponseDTO.ChatLogDetailDTO> details = list.map(ChatLogResponseDTO.ChatLogDetailDTO::from);
@@ -39,8 +39,8 @@ public class ChatLogRestController {
     
     // ✅ UID로 채팅 로그 상세 조회
     @GetMapping("/detail/{chatlog_uid}")
-    public ChatLogResponseDTO.ChatLogDetailDTO getLogByUid(@PathVariable String chatlog_uid) {
-        ChatLogsEntity chatLogsEntity = chatLogService.selectByUid(chatlog_uid);
+    public ChatLogResponseDTO.ChatLogDetailDTO getLogByUid(@PathVariable Long chatlogId) {
+        ChatLogsEntity chatLogsEntity = chatLogService.selectByUid(chatlogId);
 		return ChatLogResponseDTO.ChatLogDetailDTO.from(chatLogsEntity);
     }
 
@@ -49,7 +49,7 @@ public class ChatLogRestController {
 			consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> insertChatLog(@RequestBody ChatLogRequestDTO chatlog,
 										@RequestHeader("Authorization") String authHeader) throws IOException {
-    	String userId = authService.validateAndGetUserId(authHeader);
+		Long userId = authService.validateAndGetUserId(authHeader);
 		
         chatLogService.insertChatLog(chatlog, userId);
 
@@ -58,8 +58,8 @@ public class ChatLogRestController {
 
     // ✅ 로그 삭제
     @DeleteMapping("/deleteChatlog/{chatlog_uid}")
-    public ResponseEntity<?> deleteLog(@PathVariable String chatlog_uid) {
-        chatLogService.deleteLog(chatlog_uid);
+    public ResponseEntity<?> deleteLog(@PathVariable Long chatlogId) {
+        chatLogService.deleteLog(chatlogId);
 
 		return ResponseEntity.ok("질문이 삭제되었습니다.");
     }

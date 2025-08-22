@@ -23,14 +23,14 @@ public class BettubeResponseDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class BettubeDetailDTO {
-        private String uid;
+        private Long id;
         private String title;
         private String bettubeUrl;
         private String description;
 
         public static BettubeDetailDTO from(BettubeEntity bettubeEntity) {
             return BettubeDetailDTO.builder()
-                    .uid(bettubeEntity.getUid())
+                    .id(bettubeEntity.getId())
                     .title(bettubeEntity.getTitle())
                     .bettubeUrl(bettubeEntity.getBettubeUrl())
                     .description(bettubeEntity.getDescription())

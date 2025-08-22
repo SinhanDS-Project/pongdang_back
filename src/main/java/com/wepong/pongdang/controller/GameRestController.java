@@ -3,6 +3,7 @@ package com.wepong.pongdang.controller;
 import com.wepong.pongdang.dto.response.GameLevelResponseDTO;
 import com.wepong.pongdang.dto.response.GameResponseDTO;
 import com.wepong.pongdang.entity.*;
+import com.wepong.pongdang.entity.enums.PongHistoryType;
 import com.wepong.pongdang.entity.enums.RankType;
 import com.wepong.pongdang.entity.enums.GameType;
 import com.wepong.pongdang.entity.enums.PointHistoryType;
@@ -10,6 +11,8 @@ import com.wepong.pongdang.service.AuthService;
 import com.wepong.pongdang.service.GameLevelService;
 import com.wepong.pongdang.service.GameService;
 import com.wepong.pongdang.service.HistoryService;
+import com.wepong.pongdang.service.WalletService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +37,8 @@ public class GameRestController {
 	
 	@Autowired
 	private HistoryService historyService;
+	@Autowired
+	private WalletService walletService;
 
 	// 게임 리스트 조회
 	@GetMapping("/list")
@@ -46,7 +51,7 @@ public class GameRestController {
 
 	// 게임 상세 조회
 	@GetMapping("/detail/{gameId}")
-	public GameResponseDTO.GameDetailDTO selectById(@PathVariable String gameId) {
+	public GameResponseDTO.GameDetailDTO selectById(@PathVariable Long gameId) {
 		GameEntity gameEntity = gameService.selectById(gameId);
 		return GameResponseDTO.GameDetailDTO.from(gameEntity);
 	}
@@ -70,7 +75,7 @@ public class GameRestController {
 	}
 	
 	@GetMapping("/levels/by-game/{uid}")
-	public GameLevelResponseDTO.LevelListDTO selectLevelsByGame(@PathVariable String uid) {
+	public GameLevelResponseDTO.LevelListDTO selectLevelsByGame(@PathVariable Long uid) {
 	    List<GameLevelEntity> levelList = gameLevelService.selectByGameUid(uid);
 		List<GameLevelResponseDTO.LevelDetailDTO> details = levelList.stream()
 				.map(GameLevelResponseDTO.LevelDetailDTO::from).collect(Collectors.toList());
@@ -82,10 +87,10 @@ public class GameRestController {
 	                                   @RequestBody Map<String, Object> requestBody) {
 
 	    // 토큰에서 uid 꺼냄
-	    String uid = authService.validateAndGetUserId(authHeader);
+		Long uid = authService.validateAndGetUserId(authHeader);
 
 	    // uid로 유저 조회
-	    UserEntity userEntity = authService.findByUid(uid);
+	    UserEntity userEntity = authService.findById(uid);
 	    if (userEntity == null) {
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 	                             .body(Map.of("message", "유저를 찾을 수 없습니다."));
@@ -95,9 +100,9 @@ public class GameRestController {
 	    int betAmount = Integer.parseInt(requestBody.get("betAmount").toString());
 
 	    // 포인트 차감
-	    authService.losePoint(betAmount, userEntity.getUid());
+	    walletService.losePong(betAmount, userEntity.getId());
 
-	    return ResponseEntity.ok(Map.of("newBalance", userEntity.getPointBalance()));
+	    return ResponseEntity.ok().build();
 	}
 		
 	//win
@@ -105,8 +110,8 @@ public class GameRestController {
 	public ResponseEntity<?> stopGame(@RequestHeader("Authorization") String authHeader,
 	                                  @RequestBody Map<String, Object> requestBody) {
 
-	    String uid = authService.validateAndGetUserId(authHeader);
-	    UserEntity userEntity = authService.findByUid(uid);
+		Long uid = authService.validateAndGetUserId(authHeader);
+	    UserEntity userEntity = authService.findById(uid);
 	    if (userEntity == null) {
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 	                             .body(Map.of("message", "유저를 찾을 수 없습니다."));
@@ -114,42 +119,40 @@ public class GameRestController {
 
 	    int winAmount = Integer.parseInt(requestBody.get("winAmount").toString());
 	    int betAmount = Integer.parseInt(requestBody.get("betAmount").toString());
-	    String gameResult = requestBody.get("gameResult").toString();
+	    RankType gameResult = RankType.valueOf(requestBody.get("gameResult").toString());
 	    String gameName = requestBody.get("gameName").toString();
 
 	    // 포인트 적립
-	    authService.addPoint(winAmount, userEntity.getUid());
+	    walletService.addPong(winAmount, userEntity.getId());
 
 	    // 게임 UID 조회
-	    String gameUid = gameService.selectByName(gameName)
+		Long gameUid = gameService.selectByName(gameName)
 	        .stream()
 	        .findFirst()
 	        .orElseThrow(() -> new IllegalStateException("'" + gameName + "' 게임을 찾을 수 없습니다."))
-	        .getUid();
+	        .getId();
 
 		GameEntity gameEntity = gameService.selectById(gameUid);
 
 	    // 게임 히스토리 저장 (gameName도 같이)
 	    GameHistoryEntity gameHistoryEntity = GameHistoryEntity.builder()
-				.gameEntity(gameEntity)
-				.bettingAmount(betAmount)
-				.pointValue(winAmount - betAmount)
-				.gameResult(RankType.valueOf(gameResult))
+				.game(gameEntity)
+				.entryFee(betAmount)
+				.pongValue(winAmount - betAmount)
+				.rank(gameResult)
 				.build();
 
 		historyService.insertGameHistory(gameHistoryEntity, uid);
 
 	    // 포인트 히스토리 저장
 	    PongHistoryEntity pongHistoryEntity = PongHistoryEntity.builder()
-				.gameHistoryEntity(gameHistoryEntity)
-				.type(PointHistoryType.valueOf(gameResult))
+				.type(PongHistoryType.GAME)
 				.amount(winAmount - betAmount)
-				.balanceAfter(userEntity.getPointBalance())
 				.build();
 
 	    historyService.insertPointHistory(pongHistoryEntity, uid);
 
-	    return ResponseEntity.ok(Map.of("newBalance", userEntity.getPointBalance()));
+	    return ResponseEntity.ok().build();
 	}
 	
 	//lose
@@ -157,52 +160,50 @@ public class GameRestController {
 	public ResponseEntity<?> loseGame(@RequestHeader("Authorization") String authHeader,
 	                                  @RequestBody Map<String, Object> requestBody) {
 
-	    String uid = authService.validateAndGetUserId(authHeader);
-	    UserEntity userEntity = authService.findByUid(uid);
+		Long uid = authService.validateAndGetUserId(authHeader);
+	    UserEntity userEntity = authService.findById(uid);
 	    if (userEntity == null) {
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 	                             .body(Map.of("message", "유저를 찾을 수 없습니다."));
 	    }
 
 	    int betAmount = Integer.parseInt(requestBody.get("betAmount").toString());
-	    String gameResult = requestBody.get("gameResult").toString();
+	    RankType gameResult = RankType.valueOf(requestBody.get("gameResult").toString());
 	    String gameName = requestBody.get("gameName").toString(); 
 	    
 	    // 게임 UID 조회
-	    String gameUid = gameService.selectByName(gameName)
+		Long gameUid = gameService.selectByName(gameName)
 	        .stream()
 	        .findFirst()
 	        .orElseThrow(() -> new IllegalStateException("'" + gameName + "' 게임을 찾을 수 없습니다."))
-	        .getUid();
+	        .getId();
 
 		GameEntity gameEntity = gameService.selectById(gameUid);
 
 		// 게임 히스토리 저장 (gameName도 같이)
 		GameHistoryEntity gameHistoryEntity = GameHistoryEntity.builder()
-				.gameEntity(gameEntity)
-				.bettingAmount(betAmount)
-				.pointValue(betAmount)
-				.gameResult(RankType.valueOf(gameResult))
+				.game(gameEntity)
+				.entryFee(betAmount)
+				.pongValue(betAmount)
+				.rank(gameResult)
 				.build();
 
 		historyService.insertGameHistory(gameHistoryEntity, uid);
 
 		// 포인트 히스토리 저장
 		PongHistoryEntity pongHistoryEntity = PongHistoryEntity.builder()
-				.gameHistoryEntity(gameHistoryEntity)
-				.type(PointHistoryType.valueOf(gameResult))
+				.type(PongHistoryType.GAME)
 				.amount(betAmount)
-				.balanceAfter(userEntity.getPointBalance())
 				.build();
 
 		historyService.insertPointHistory(pongHistoryEntity, uid);
 
-	    return ResponseEntity.ok(Map.of("newBalance", userEntity.getPointBalance()));
+	    return ResponseEntity.ok().build();
 	}
 	
 	// 게임 난이도 상세 조회
 	@GetMapping("/level/{levelId}")
-	public GameLevelEntity selectLevelByRoom(@PathVariable String levelId) {
+	public GameLevelEntity selectLevelByRoom(@PathVariable Long levelId) {
 		return gameLevelService.selectByLevelUid(levelId);
 	}
 }

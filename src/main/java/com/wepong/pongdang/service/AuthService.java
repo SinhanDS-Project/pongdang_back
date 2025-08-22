@@ -9,6 +9,7 @@ import com.wepong.pongdang.exception.*;
 import com.wepong.pongdang.model.aws.S3FileServiceReturnKey;
 import com.wepong.pongdang.repository.TokenRepository;
 import com.wepong.pongdang.repository.UserRepository;
+import com.wepong.pongdang.repository.WalletRepository;
 import com.wepong.pongdang.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +31,8 @@ public class AuthService {
 
 	private final UserRepository userRepository;
 	private final TokenRepository tokenRepository;
+	private final WalletRepository walletRepository;
+	private final WalletService walletService;
 
 	@Autowired
 	private JWTUtil jwtUtil;
@@ -45,7 +47,7 @@ public class AuthService {
 		Map<String, String> responseToken = new HashMap<>();
 		
 		UserEntity userEntity = userRepository.findByEmail(request.getEmail());
-		AuthTokenEntity token = tokenRepository.findByUserUid(userEntity.getUid());
+		AuthTokenEntity token = tokenRepository.findByUserId(userEntity.getId());
 
 		if (userEntity == null) {
 			throw new UserNotFoundException();
@@ -54,13 +56,12 @@ public class AuthService {
 		}
 
 
-		String accessToken = jwtUtil.generateAccessToken(userEntity.getUid());
-		String refreshToken = jwtUtil.generateRefreshToken(userEntity.getUid());
+		String accessToken = jwtUtil.generateAccessToken(userEntity.getId());
+		String refreshToken = jwtUtil.generateRefreshToken(userEntity.getId());
 
 		if (token == null) {
 			token = AuthTokenEntity.builder()
-					.uid(UUID.randomUUID().toString().replace("-", ""))
-					.userEntity(userEntity)
+					.user(userEntity)
 					.refreshToken(refreshToken)
 					.build();
 		} else {
@@ -68,7 +69,6 @@ public class AuthService {
 		}
 
 		tokenRepository.save(token);
-		userEntity.updateLastLoginAt();
 		
 		responseToken.put("accessToken", accessToken);
 		responseToken.put("refreshToken", refreshToken);
@@ -81,16 +81,16 @@ public class AuthService {
 			throw new InvalidTokenException();
 		}
 
-		String userId = jwtUtil.getUserIdFromToken(refreshToken);
+		Long userId = jwtUtil.getUserIdFromToken(refreshToken);
 		return jwtUtil.generateAccessToken(userId);
 	}
 
-	public UserEntity findByUid(String uid) {
-		UserEntity userEntity = userRepository.findById(uid).orElseThrow(() -> new UserNotFoundException());
+	public UserEntity findById(Long id) {
+		UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException());
 		return userEntity;
 	}
 
-	public String validateAndGetUserId(String authHeader) {
+	public Long validateAndGetUserId(String authHeader) {
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			throw new InvalidTokenException();
 		}
@@ -126,7 +126,6 @@ public class AuthService {
     }
     
 		UserEntity userEntity = UserEntity.builder()
-				.uid(UUID.randomUUID().toString().replace("-", ""))
 				.userName(dto.getUserName())
 				.password(passwordEncoder.encode(dto.getPassword()))
 				.nickname(dto.getNickname())
@@ -134,13 +133,14 @@ public class AuthService {
 				.birthDate(birthDate)
 				.phoneNumber(dto.getPhoneNumber())
 				.agreePrivacy(dto.isAgreePrivacy())
-				.pointBalance(100000)
 				.build();
 
 		userRepository.save(userEntity);
+
+		walletService.insertWallet(userEntity);
 	}
 
-	public void updateUser(UserUpdateRequestDTO userRequest, String userId) {
+	public void updateUser(UserUpdateRequestDTO userRequest, Long userId) {
 		// 기존 정보 조회
 		UserEntity existingUserEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException());
 	    
@@ -198,20 +198,8 @@ public class AuthService {
 	    return url.substring(index + ".amazonaws.com/".length());
 	}
 
-	public void addPoint(int point, String userId) {
-		UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException());
-		userEntity.addPoint(point);
-		userRepository.save(userEntity);
-	}
-
-	public void losePoint(int point, String userId) {
-		UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException());
-		userEntity.losePoint(point);
-		userRepository.save(userEntity);
-	}
-
-	public void logout(String userId) {
-		AuthTokenEntity token = tokenRepository.findByUserUid(userId);
+	public void logout(Long userId) {
+		AuthTokenEntity token = tokenRepository.findByUserId(userId);
 		tokenRepository.delete(token);
 	}
 
@@ -220,7 +208,7 @@ public class AuthService {
 		return email;
 	}
 
-	public void updatePassword(String userId, String password) {
+	public void updatePassword(Long userId, String password) {
 		UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException());
 		userEntity.updatePassword(passwordEncoder.encode(password));
 		userRepository.save(userEntity);

@@ -27,7 +27,7 @@ public class GameService {
     }
 
     // uid로 조회
-    public GameEntity selectById(String gameId) {
+    public GameEntity selectById(Long gameId) {
         return gameRepository.findById(gameId).orElseThrow(() -> new RuntimeException("게임이 존재하지 않습니다."));
     }
     
