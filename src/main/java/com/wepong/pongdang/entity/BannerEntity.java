@@ -1,9 +1,7 @@
 package com.wepong.pongdang.entity;
 
 import com.wepong.pongdang.entity.common.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity(name = "banner")
@@ -14,8 +12,8 @@ import lombok.*;
 public class BannerEntity extends BaseEntity {
 
     @Id
-    @Column(columnDefinition = "CHAR(32)")
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private String title;

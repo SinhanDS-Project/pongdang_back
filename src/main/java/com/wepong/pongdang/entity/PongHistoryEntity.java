@@ -1,35 +1,28 @@
 package com.wepong.pongdang.entity;
 
 import com.wepong.pongdang.entity.common.BaseEntity;
-import com.wepong.pongdang.entity.enums.RankType;
+import com.wepong.pongdang.entity.enums.PongHistoryType;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity(name = "game_history")
+@Entity(name = "pong_history")
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class GameHistoryEntity extends BaseEntity {
+public class PongHistoryEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private int entryFee;
-
     @Enumerated(EnumType.STRING)
-    private RankType rank;
+    private PongHistoryType type;
 
     @Column(nullable = false)
-    private int pongValue;
+    private int amount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_id")
-    private GameEntity game;
 }

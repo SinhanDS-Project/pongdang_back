@@ -1,13 +1,11 @@
 package com.wepong.pongdang.entity;
 
 import com.wepong.pongdang.entity.common.BaseEntity;
-import com.wepong.pongdang.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.sql.Date;
-import java.time.LocalDateTime;
 
 @Entity(name = "user") // 테이블 이름
 @Getter
@@ -18,8 +16,8 @@ import java.time.LocalDateTime;
 public class UserEntity extends BaseEntity {
 
     @Id // PK 설정
-    @Column(name = "uid", columnDefinition = "CHAR(32)") // 칼럼 속성 설정
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     private String userName;
@@ -39,34 +37,14 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false)
     private Date birthDate;
 
-    @Column(nullable = false)
     @ColumnDefault("0")
     private boolean agreePrivacy;
-
-    @Column
-    @ColumnDefault("0")
-    private int pointBalance;
 
     @Column(columnDefinition = "VARCHAR(225) DEFAULT ''")
     private String profileImage;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
-    @Column
-    private LocalDateTime lastLoginAt;
-
-    public void updateLastLoginAt() {
-        this.lastLoginAt = LocalDateTime.now();
-    }
-
-    public void addPoint(int point) {
-        this.pointBalance += point;
-    }
-
-    public void losePoint(int point) {
-        this.pointBalance -= point;
-    }
+    @ColumnDefault("0")
+    private Boolean tutorialCheck;
 
     public void updatePassword(String password) {
         this.password = password;

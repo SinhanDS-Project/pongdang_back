@@ -15,8 +15,8 @@ import lombok.*;
 public class GameEntity extends BaseEntity {
 
     @Id
-    @Column(columnDefinition = "CHAR(32)")
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(225)")
     private String name;
