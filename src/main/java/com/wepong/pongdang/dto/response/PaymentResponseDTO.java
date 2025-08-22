@@ -14,7 +14,7 @@ import java.sql.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaymentResponseDTO {
-    private String uid;
+    private Long id;
     private String payType;
     private int amount;
     private String orderUid;
@@ -23,12 +23,12 @@ public class PaymentResponseDTO {
     private Date approveAt;
     private String failureReason;
     private String receiptUrl;
-    private String UserUid;
-    private String UserName;
+    private Long userId;
+    private String userName;
 
     public static PaymentResponseDTO from(PaymentEntity paymentEntity) {
         return PaymentResponseDTO.builder()
-                .uid(paymentEntity.getUid())
+                .id(paymentEntity.getId())
                 .payType(paymentEntity.getPayType())
                 .amount(paymentEntity.getAmount())
                 .orderUid(paymentEntity.getOrderUid())
@@ -37,8 +37,8 @@ public class PaymentResponseDTO {
                 .approveAt(paymentEntity.getApproveAt())
                 .receiptUrl(paymentEntity.getReceiptUrl())
                 .failureReason(paymentEntity.getFailureReason())
-                .UserUid(paymentEntity.getUserEntity().getUid())
-                .UserName(paymentEntity.getUserEntity().getUserName())
+                .userId(paymentEntity.getUser().getId())
+                .userName(paymentEntity.getUser().getUserName())
                 .build();
     }
 }

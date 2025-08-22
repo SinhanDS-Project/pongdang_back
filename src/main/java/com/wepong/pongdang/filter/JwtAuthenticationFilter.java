@@ -42,13 +42,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		if (token != null) {
 			if (jwtUtil.validateToken(token)) {
-				String userId = jwtUtil.getUserIdFromToken(token);
+				Long userId = jwtUtil.getUserIdFromToken(token);
 				setAuthentication(userId);
 			} else if (jwtUtil.isTokenExpired(token)) {
 				String refreshToken = getRefreshTokenFromCookie(httpReq);
 
 				if (refreshToken != null && jwtUtil.validateToken(refreshToken)) {
-					String userId = jwtUtil.getUserIdFromToken(refreshToken);
+					Long userId = jwtUtil.getUserIdFromToken(refreshToken);
 					String newAccessToken = jwtUtil.generateAccessToken(userId);
 					httpRes.setHeader("New-Access-Token", "Bearer " + newAccessToken);
 					setAuthentication(userId);
@@ -59,7 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		chain.doFilter(httpReq, httpRes);
 	}
 
-	private void setAuthentication(String userId) {
+	private void setAuthentication(Long userId) {
 		UsernamePasswordAuthenticationToken authentication =
 				new UsernamePasswordAuthenticationToken(userId, null, null);
 		SecurityContextHolder.getContext().setAuthentication(authentication);

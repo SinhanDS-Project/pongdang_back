@@ -15,11 +15,11 @@ public class GameLevelService {
 
 	private final GameLevelRepository gameLevelRepository;
 	
-	public List<GameLevelEntity> selectByGameUid(String gameUid){
-		return gameLevelRepository.findByGameUid(gameUid);
+	public List<GameLevelEntity> selectByGameUid(Long gameId){
+		return gameLevelRepository.findByGameId(gameId);
 	}
 
-	public GameLevelEntity selectByLevelUid(String levelId) {
+	public GameLevelEntity selectByLevelUid(Long levelId) {
 		return gameLevelRepository.findById(levelId).orElseThrow(() -> new RuntimeException("레벨이 존재하지 않습니다."));
 	}
 }

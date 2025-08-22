@@ -43,7 +43,7 @@ public class VerificationService {
 	}
 
 	// 임시 비밀번호 발급
-	public void updatePassword(String email, String userId) {
+	public void updatePassword(String email, Long userId) {
 		String tempPassword = generateTempPassword();
 
 		authService.updatePassword(userId, tempPassword);

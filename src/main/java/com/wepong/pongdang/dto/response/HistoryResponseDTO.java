@@ -2,8 +2,8 @@ package com.wepong.pongdang.dto.response;
 
 import com.wepong.pongdang.entity.GameHistoryEntity;
 import com.wepong.pongdang.entity.PongHistoryEntity;
+import com.wepong.pongdang.entity.enums.PongHistoryType;
 import com.wepong.pongdang.entity.enums.RankType;
-import com.wepong.pongdang.entity.enums.PointHistoryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,24 +41,24 @@ public class HistoryResponseDTO {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class GameDetailResponseDTO {
-		private String uid;
-		private String userUid;
-		private String gameUid;
+		private Long id;
+		private Long userId;
+		private Long gameId;
 		private String gameName;
-		private int bettingAmount;
+		private int entryFee;
 		private RankType gameResult;
-		private int pointValue;
+		private int pongValue;
 		private LocalDateTime createdAt;
 
 		public static GameDetailResponseDTO from(GameHistoryEntity history) {
 			return GameDetailResponseDTO.builder()
-					.uid(history.getUid())
-					.userUid(history.getUserEntity().getUid())
-					.gameUid(history.getGameEntity().getUid())
-					.gameName(history.getGameEntity().getName())
-					.bettingAmount(history.getBettingAmount())
-					.gameResult(history.getGameResult())
-					.pointValue(history.getPointValue())
+					.id(history.getId())
+					.userId(history.getUser().getId())
+					.gameId(history.getGame().getId())
+					.gameName(history.getGame().getName())
+					.entryFee(history.getEntryFee())
+					.gameResult(history.getRank())
+					.pongValue(history.getPongValue())
 					.createdAt(history.getCreatedAt())
 					.build();
 		}
@@ -91,25 +91,19 @@ public class HistoryResponseDTO {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class PointDetailResponseDTO {
-		private String uid;
-		private String userUid;
-		private PointHistoryType type;
+		private Long id;
+		private Long userId;
+		private PongHistoryType type;
 		private int amount;
-		private int balanceAfter;
-		private String ghUid;
 		private LocalDateTime createdAt;
-		private String gameName;
 
 		public static PointDetailResponseDTO from(PongHistoryEntity history) {
 			return PointDetailResponseDTO.builder()
-					.uid(history.getUid())
-					.userUid(history.getUserEntity().getUid())
+					.id(history.getId())
+					.userId(history.getUser().getId())
 					.type(history.getType())
 					.amount(history.getAmount())
-					.balanceAfter(history.getBalanceAfter())
-					.ghUid(history.getGameHistoryEntity().getUid())
 					.createdAt(history.getCreatedAt())
-					.gameName(history.getGameHistoryEntity().getGameEntity().getName())
 					.build();
 		}
 	}

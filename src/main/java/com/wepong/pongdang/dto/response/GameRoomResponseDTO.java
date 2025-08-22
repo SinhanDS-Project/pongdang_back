@@ -36,26 +36,26 @@ public class GameRoomResponseDTO {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class GameRoomDetailDTO {
-		private String uid;
+		private Long id;
 		private String title;
-		private int minBet;
+		private int entryFee;
 		private GameRoomStatus status;
 		private LocalDateTime createdAt;
 		private LocalDateTime startAt;
-		private String hostUid;
+		private Long hostId;
 		private Level level;
 		private String gameName;
 		private int count;
 
 		public static GameRoomDetailDTO from(GameRoomEntity room, int count) {
 			return GameRoomDetailDTO.builder()
-					.uid(room.getUid())
+					.id(room.getId())
 					.title(room.getTitle())
-					.level(room.getGameLevelEntity().getLevel())
-					.gameName(room.getGameLevelEntity().getGameEntity().getName())
+					.level(room.getGameLevel().getLevel())
+					.gameName(room.getGameLevel().getGame().getName())
 					.count(count)
-					.minBet(room.getMinBet())
-					.hostUid(room.getUserEntity().getUid())
+					.entryFee(room.getGameLevel().getEntryFee())
+					.hostId(room.getUser().getId())
 					.createdAt(room.getCreatedAt())
 					.status(room.getStatus())
 					.build();

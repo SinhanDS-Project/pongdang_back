@@ -32,7 +32,7 @@ public class GameRoomRestController {
 
 	// 게임방 상세 조회
 	@GetMapping("/detail/{roomId}")
-	public GameRoomResponseDTO.GameRoomDetailDTO selectById(@PathVariable String roomId) {
+	public GameRoomResponseDTO.GameRoomDetailDTO selectById(@PathVariable Long roomId) {
 		return gameRoomService.selectById(roomId);
 	}
 
@@ -40,7 +40,7 @@ public class GameRoomRestController {
 	@PostMapping(value = "/insert", produces = "text/plain;charset=utf-8")
 	public ResponseEntity<?> insertRoom(@RequestBody GameRoomRequestDTO.InsertGameRoomRequestDTO roomRequest,
 									 @RequestHeader("Authorization") String authHeader) throws IOException {
-		String userId = authService.validateAndGetUserId(authHeader);
+		Long userId = authService.validateAndGetUserId(authHeader);
 		gameRoomService.insertRoom(roomRequest, userId);
 		gameRoomListWebSocket.broadcastMessage("insert");
 
@@ -64,7 +64,7 @@ public class GameRoomRestController {
 
 	// 게임 시작
 	@PostMapping("/start/{roomId}")
-	public ResponseEntity<?> startGame(@PathVariable String roomId, @RequestBody Map<String, String> request) throws IOException {
+	public ResponseEntity<?> startGame(@PathVariable Long roomId, @RequestBody Map<String, String> request) throws IOException {
 		GameRoomStatus newStatus = GameRoomStatus.valueOf(request.get("status"));
 		GameRoomResponseDTO.GameRoomDetailDTO room = gameRoomService.selectById(roomId);
 		if(!room.getStatus().equals(newStatus)) {

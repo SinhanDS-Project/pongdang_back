@@ -6,6 +6,7 @@ import com.wepong.pongdang.entity.GameEntity;
 import com.wepong.pongdang.entity.GameHistoryEntity;
 import com.wepong.pongdang.entity.PongHistoryEntity;
 import com.wepong.pongdang.entity.UserEntity;
+import com.wepong.pongdang.entity.enums.PongHistoryType;
 import com.wepong.pongdang.entity.enums.RankType;
 import com.wepong.pongdang.entity.enums.GameRoomStatus;
 import com.wepong.pongdang.entity.enums.Level;
@@ -54,13 +55,15 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 
 	private final Map<String, List<Double>> latestPositions = new ConcurrentHashMap<>();
 	private final Map<String, ScheduledFuture<?>> broadcastTasks = new ConcurrentHashMap<>();
-	private final Map<String, List<TurtlePlayerDTO>> gameStartPlayersMap = new ConcurrentHashMap<>();
-	private final Map<String, Boolean> gameFinishMap = new ConcurrentHashMap<>();
-	
+	private final Map<Long, List<TurtlePlayerDTO>> gameStartPlayersMap = new ConcurrentHashMap<>();
+	private final Map<Long, Boolean> gameFinishMap = new ConcurrentHashMap<>();
+	@Autowired
+	private WalletService walletService;
+
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		String roomId = (String) session.getAttributes().get("roomId");
-		String userId = (String) session.getAttributes().get("userId");
+		Long roomId = (Long) session.getAttributes().get("roomId");
+		Long userId = (Long) session.getAttributes().get("userId");
 
 		sessionService.addSession(roomId, session);
 	    // (1) 게임 시작 전이면 검증 건너뛰고, 그냥 세션 등록
@@ -71,7 +74,7 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 	    // (2) 게임 시작 후에는 userId가 freeze 목록에 없으면 강제퇴장
 	    boolean inGame = false;
 	    for (TurtlePlayerDTO player : startPlayers) {
-	        if (player.getUserUid().equals(userId)) {
+	        if (player.getUserId().equals(userId)) {
 	            inGame = true;
 	            break;
 	        }
@@ -89,7 +92,7 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 	    }
 	}
 
-	private void broadcastMessage(String type, String roomId, Map<String, Object> data) throws IOException {
+	private void broadcastMessage(String type, Long roomId, Map<String, Object> data) throws IOException {
 		// 웹소켓 메시지 전송
 		List<WebSocketSession> sessions = sessionService.getSessions(roomId);
 		if (sessions == null || sessions.isEmpty()) {
@@ -130,7 +133,7 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 		        sessionService.removeSession(roomId, session);
 		        if(!Boolean.TRUE.equals(gameFinishMap.get(roomId))) {
 			        // 유저 아이디가 있으면 패배 처리도 같이!
-			        String userId = (String) session.getAttributes().get("userId");
+					Long userId = (Long) session.getAttributes().get("userId");
 			        if (userId != null) {
 			            processUserLose(roomId, userId);
 			        }
@@ -139,14 +142,14 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 		}
 	}
 
-	public void onGameStart(String roomId) throws IOException {
+	public void onGameStart(Long roomId) throws IOException {
 		// 게임 시작 시점의 참가자 전체 정보 저장
 		List<TurtlePlayerDTO> startPlayers = playerDAO.getAll(roomId);
 		// null 방지
 		if (startPlayers != null) {
 			gameStartPlayersMap.put(roomId, new ArrayList<>(startPlayers));
 		}
-		int totalBet = startPlayers.stream().mapToInt(TurtlePlayerDTO :: getBettingPoint).sum();
+		int totalBet = startPlayers.stream().mapToInt(TurtlePlayerDTO :: getEntryFee).sum();
 		Map<String, Object> data = new HashMap<>();
 		data.put("totalBet", totalBet);
 		broadcastMessage("game_start", roomId, data);
@@ -162,8 +165,8 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 
 		String type = json.get("type").asText();
 
-		String roomId = (String) session.getAttributes().get("roomId");
-		String userId = (String) session.getAttributes().get("userId");
+		Long roomId = (Long) session.getAttributes().get("roomId");
+		Long userId = (Long) session.getAttributes().get("userId");
 		GameRoomResponseDTO.GameRoomDetailDTO gameroom = gameRoomService.selectById(roomId);
 	    Level difficulty = gameroom.getLevel();
 		// 메시지 타입에 따라 분기
@@ -177,7 +180,7 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 		}
 			turtleGameService.startGame(roomId, turtleCount, new TurtleGameService.RaceUpdateCallback() {
 				@Override
-				public void onRaceUpdate(String roomId, double[] positions) {
+				public void onRaceUpdate(Long roomId, double[] positions) {
 					try {
 						broadcastRaceUpdate(roomId, positions);
 					} catch (IOException e) {
@@ -185,7 +188,7 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 					}
 				}
 				@Override
-				public void onRaceFinish(String roomId, int winner, List<Map<String, Object>> results) {
+				public void onRaceFinish(Long roomId, int winner, List<Map<String, Object>> results) {
 					try {
 						broadcastRaceFinish(roomId, winner, results);
 					} catch (IOException e) {
@@ -195,7 +198,7 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 			});
 			broadcastMessage("game_start", roomId, null);
             // 방의 host_uid 조회 (DB 또는 room info에서)
-            String roomHostUid = gameroom.getHostUid();
+			Long roomHostUid = gameroom.getHostId();
             if (userId.equals(roomHostUid)) {
                 onGameStart(roomId); // 참가자 freeze
             }
@@ -205,7 +208,7 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 			for (TurtlePlayerDTO player : players) {
 				player.setTurtleId(null);
 				player.setReady(false);
-				player.setBettingPoint(gameRoomService.selectById(roomId).getMinBet());
+				player.setEntryFee(gameRoomService.selectById(roomId).getEntryFee());
 			}
 			gameStartPlayersMap.remove(roomId);
 			Map<String, Object> data = new HashMap<>();
@@ -216,7 +219,7 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 	}
 
 	// 방에 위치 정보를 스케쥴러로 보내주는 함수
-	private void broadcastRaceUpdate(String roomId, double[] positions) throws IOException {
+	private void broadcastRaceUpdate(Long roomId, double[] positions) throws IOException {
 		List<WebSocketSession> sessions = sessionService.getSessions(roomId);
 		if (sessions == null)
 			return;
@@ -229,7 +232,7 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 		broadcastMessage("race_update", roomId, msg);
 	}
 
-	private void broadcastRaceFinish(String roomId, int winner, List<Map<String, Object>> results) throws IOException {
+	private void broadcastRaceFinish(Long roomId, int winner, List<Map<String, Object>> results) throws IOException {
 		List<WebSocketSession> sessions = sessionService.getSessions(roomId);
 		if(sessions == null) 
 			return;
@@ -245,8 +248,8 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 	}
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		String roomId = (String) session.getAttributes().get("roomId");
-		String userId = (String) session.getAttributes().get("userId");
+		Long roomId = (Long) session.getAttributes().get("roomId");
+		Long userId = (Long) session.getAttributes().get("userId");
 		sessionService.removeSession(roomId, session);
 
 		GameRoomResponseDTO.GameRoomDetailDTO gameroom = gameRoomService.selectById(roomId);
@@ -256,18 +259,18 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 
 			playerDAO.removePlayer(roomId, userId);
 
-			if (userId.equals(gameroom.getHostUid())) {
+			if (userId.equals(gameroom.getHostId())) {
 				// 방장 퇴장 시 host 위임 또는 방 삭제
 				List<TurtlePlayerDTO> players = playerDAO.getAll(roomId); // 방장 제외하고 재조회
 			
 				if (players != null && !players.isEmpty()) {
-					String newHostUid = players.get(0).getUserUid();
-					gameRoomService.updateHost(roomId, newHostUid);
+					Long newHostId = players.get(0).getUserId();
+					gameRoomService.updateHost(roomId, newHostId);
 				
 					// host_changed 메시지 브로드캐스트
 					Map<String, Object> msg = new HashMap<>();
 					msg.put("type", "host_changed");
-					msg.put("newHostUid", newHostUid);
+					msg.put("newHostUid", newHostId);
 					msg.put("positions", latestPositions.get(roomId));
 					broadcastMessage("host_changed", roomId, msg);
 				} else {
@@ -287,42 +290,40 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 		}
 	}
 
-	public void processUserLose(String roomId, String userId) {
+	public void processUserLose(Long roomId, Long userId) {
 		// 나간사람  패배처리
 		List<TurtlePlayerDTO> startPlayers = gameStartPlayersMap.get(roomId);
 		if (startPlayers != null) {
 			for (TurtlePlayerDTO player : startPlayers) {
-				if (player.getUserUid().equals(userId)) {
-					int betAmount = player.getBettingPoint();
+				if (player.getUserId().equals(userId)) {
+					int betAmount = player.getEntryFee();
 					String gameName = "Turtle Run";
-					String gameResult = "LOSE";
+					RankType gameResult = RankType.LOSE;
 					int winAmount = 0;
 					// 1) 유저 정보 조회
-					UserEntity userEntity = authService.findByUid(userId);
+					UserEntity userEntity = authService.findById(userId);
 					if (userEntity != null) {
-						authService.losePoint(betAmount, userEntity.getUid());
-						String gameUid = gameService.selectByName(gameName).stream().findFirst()
+						walletService.losePong(betAmount, userEntity.getId());
+						Long gameId = gameService.selectByName(gameName).stream().findFirst()
 								.orElseThrow(() -> new IllegalStateException("'" + gameName + "' 게임을 찾을 수 없습니다."))
-								.getUid();
+								.getId();
 
-						GameEntity gameEntity = gameService.selectById(gameUid);
+						GameEntity gameEntity = gameService.selectById(gameId);
 
 						// 게임 히스토리 저장 (gameName도 같이)
 						GameHistoryEntity gameHistoryEntity = GameHistoryEntity.builder()
-								.gameEntity(gameEntity)
-								.bettingAmount(betAmount)
-								.pointValue(Math.abs(winAmount - betAmount))
-								.gameResult(RankType.valueOf(gameResult))
+								.game(gameEntity)
+								.entryFee(betAmount)
+								.pongValue(Math.abs(winAmount - betAmount))
+								.rank(gameResult)
 								.build();
 
 						historyService.insertGameHistory(gameHistoryEntity, userId);
 
 						// 포인트 히스토리 저장
 						PongHistoryEntity pongHistoryEntity = PongHistoryEntity.builder()
-								.gameHistoryEntity(gameHistoryEntity)
-								.type(PointHistoryType.valueOf(gameResult))
+								.type(PongHistoryType.GAME)
 								.amount(Math.abs(winAmount - betAmount))
-								.balanceAfter(userEntity.getPointBalance())
 								.build();
 
 						historyService.insertPointHistory(pongHistoryEntity, userId);
@@ -331,7 +332,7 @@ public class TurtleRunWebsocketHandler extends TextWebSocketHandler {
 				}
 			}
 			// 2. startPlayers에서 userId 제거
-	        startPlayers.removeIf(p -> p.getUserUid().equals(userId));
+	        startPlayers.removeIf(p -> p.getUserId().equals(userId));
 		}
 	}
 	

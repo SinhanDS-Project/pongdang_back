@@ -10,7 +10,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 // 웹소켓 설정
 @Configuration
 @EnableWebSocket
-@ComponentScan(basePackages = "com.bettopia") // 또는 포함 경로 지정
+@ComponentScan(basePackages = "com.wepong") // 또는 포함 경로 지정
 public class WebSocketConfig implements WebSocketConfigurer {
 
 	@Autowired

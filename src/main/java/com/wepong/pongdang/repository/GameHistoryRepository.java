@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface GameHistoryRepository extends JpaRepository<GameHistoryEntity, String> {
-    HistoryResponseDTO.GameResponseDTO findByUserUid(String userId);
+public interface GameHistoryRepository extends JpaRepository<GameHistoryEntity, Long> {
+    HistoryResponseDTO.GameResponseDTO findByUserId(Long userId);
 
-    int countByUserUid(String userId);
+    int countByUserId(Long userId);
 
-    Page<GameHistoryEntity> findByUserUid(String userId, Pageable pageable);
+    Page<GameHistoryEntity> findByUserId(Long userId, Pageable pageable);
 }

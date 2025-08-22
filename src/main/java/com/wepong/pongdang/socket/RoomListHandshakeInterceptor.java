@@ -30,7 +30,7 @@ public class RoomListHandshakeInterceptor implements HandshakeInterceptor {
 
 			// 토큰 추출
 			String authHeader = "Bearer " + servletRequest.getParameter("token");
-			String userId = authService.validateAndGetUserId(authHeader);
+			Long userId = authService.validateAndGetUserId(authHeader);
 
 			attributes.put("userId", userId);
 		}

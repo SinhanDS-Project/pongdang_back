@@ -36,7 +36,7 @@ public class GameResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class GameDetailDTO {
-        private String uid;
+        private Long id;
         private String name;
         private GameType type;
         private String description;
@@ -50,7 +50,7 @@ public class GameResponseDTO {
 
         public static GameDetailDTO from(GameEntity gameEntity) {
             return GameDetailDTO.builder()
-                    .uid(gameEntity.getUid())
+                    .id(gameEntity.getId())
                     .name(gameEntity.getName())
                     .type(gameEntity.getType())
                     .description(gameEntity.getDescription())

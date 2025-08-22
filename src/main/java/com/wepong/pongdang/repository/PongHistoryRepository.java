@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PointHistoryRepository extends JpaRepository<PongHistoryEntity, String> {
-    HistoryResponseDTO.PointResponseDTO findByUserUid(String userId);
+public interface PongHistoryRepository extends JpaRepository<PongHistoryEntity, Long> {
+    HistoryResponseDTO.PointResponseDTO findByUserId(Long userId);
 
-    int countByUserUid(String userId);
+    int countByUserId(Long userId);
 
-    Page<PongHistoryEntity> findByUserUid(String userId, Pageable pageable);
+    Page<PongHistoryEntity> findByUserId(Long userId, Pageable pageable);
 }

@@ -20,13 +20,13 @@ public class PlayerRestController {
 
     // 전체 게임방 플레이어 수 조회
     @GetMapping("/count")
-    public Map<String, Integer> getAllCounts() {
+    public Map<Long, Integer> getAllCounts() {
         return playerService.getAllPlayers();
     }
 
     // 게임방 플레이어 상세 조회
     @GetMapping("/detail/{roomId}")
-    public List<TurtlePlayerDTO> getPlayers(@PathVariable String roomId) {
+    public List<TurtlePlayerDTO> getPlayers(@PathVariable Long roomId) {
         return playerService.getPlayers(roomId);
     }
 }

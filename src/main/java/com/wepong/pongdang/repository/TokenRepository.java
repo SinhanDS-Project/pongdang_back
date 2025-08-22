@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TokenRepository extends JpaRepository<AuthTokenEntity, String> {
-    AuthTokenEntity findByUserUid(String userId);
+public interface TokenRepository extends JpaRepository<AuthTokenEntity, Long> {
+    AuthTokenEntity findByUserId(Long userId);
 }

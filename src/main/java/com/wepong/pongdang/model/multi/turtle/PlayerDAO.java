@@ -12,17 +12,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class PlayerDAO {
 
-    private final Map<String, List<TurtlePlayerDTO>> roomPlayers = new ConcurrentHashMap<>();
+    private final Map<Long, List<TurtlePlayerDTO>> roomPlayers = new ConcurrentHashMap<>();
 
-    public void addPlayer(String roomId, TurtlePlayerDTO player) {
+    public void addPlayer(Long roomId, TurtlePlayerDTO player) {
         roomPlayers.computeIfAbsent(roomId, k -> Collections.synchronizedList(new ArrayList<>())).add(player);
     }
 
-    public void removePlayer(String roomId, String userId) {
+    public void removePlayer(Long roomId, Long userId) {
         List<TurtlePlayerDTO> players = roomPlayers.get(roomId);
         if (players != null) {
             synchronized (players) {
-                players.removeIf(p -> p.getUserUid().equals(userId));
+                players.removeIf(p -> p.getUserId().equals(userId));
                 if(players.isEmpty()) { // 플레이어가 없으면 방 삭제
                     roomPlayers.remove(roomId);
                 }
@@ -31,17 +31,17 @@ public class PlayerDAO {
     }
 
     // 현재 게임방 플레이어 리스트
-    public List<TurtlePlayerDTO> getAll(String roomId) {
+    public List<TurtlePlayerDTO> getAll(Long roomId) {
         return roomPlayers.get(roomId);
     }
 
     // 현재 로그인한 사용자의 플레이어 정보
-    public TurtlePlayerDTO getPlayer(String roomId, String userId) {
+    public TurtlePlayerDTO getPlayer(Long roomId, Long userId) {
         List<TurtlePlayerDTO> players = roomPlayers.get(roomId);
         if (players != null) {
             synchronized (players) {
                 for (TurtlePlayerDTO player : players) {
-                    if (player.getUserUid().equals(userId)) {
+                    if (player.getUserId().equals(userId)) {
                         return player;
                     }
                 }

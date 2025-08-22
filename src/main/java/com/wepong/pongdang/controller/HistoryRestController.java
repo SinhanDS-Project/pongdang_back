@@ -22,7 +22,7 @@ public class HistoryRestController {
     public HistoryResponseDTO.GameResponseDTO gameHistoryList(
     											@RequestHeader("Authorization") String authHeader,
                                                 @RequestParam(defaultValue = "1") int page) {
-        String userId = authService.validateAndGetUserId(authHeader);
+        Long userId = authService.validateAndGetUserId(authHeader);
         return historyService.gameHistoryList(userId, page);
     }
 
@@ -30,14 +30,14 @@ public class HistoryRestController {
     public HistoryResponseDTO.PointResponseDTO pointHistoryList(
     											@RequestHeader("Authorization") String authHeader,
                                                 @RequestParam(defaultValue = "1") int page) {
-        String userId = authService.validateAndGetUserId(authHeader);
+        Long userId = authService.validateAndGetUserId(authHeader);
         return historyService.pointHistoryList(userId, page);
     }
 
     @PostMapping("/game/insert")
     public ResponseEntity<?> insertGameHistory(@RequestBody GameHistoryEntity gameRequest,
                                             @RequestHeader("Authorization") String authHeader) {
-        String userId = authService.validateAndGetUserId(authHeader);
+        Long userId = authService.validateAndGetUserId(authHeader);
         historyService.insertGameHistory(gameRequest, userId);
 
         return ResponseEntity.ok("게임 히스토리 저장이 완료되었습니다.");
@@ -46,7 +46,7 @@ public class HistoryRestController {
     @PostMapping("/point/insert")
     public ResponseEntity<?> insertPointHistory(@RequestBody PongHistoryEntity pointRequest,
                                     @RequestHeader("Authorization") String authHeader) {
-        String userId = authService.validateAndGetUserId(authHeader);
+        Long userId = authService.validateAndGetUserId(authHeader);
         historyService.insertPointHistory(pointRequest, userId);
 
         return ResponseEntity.ok("포인트 히스토리 저장이 완료되었습니다.");

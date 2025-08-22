@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface GameRoomRepository extends JpaRepository<GameRoomEntity, String> {
+public interface GameRoomRepository extends JpaRepository<GameRoomEntity, Long> {
 //    Page<GameRoom> findAll(Pageable pageable);
 }

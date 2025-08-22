@@ -1,7 +1,5 @@
 package com.wepong.pongdang.entity;
 
-import com.wepong.pongdang.entity.common.BaseEntity;
-import com.wepong.pongdang.entity.enums.Level;
 import com.wepong.pongdang.entity.enums.RankType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,7 +9,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class RewardPerResult {
+public class RewardPerResultEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
