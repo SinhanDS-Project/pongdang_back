@@ -8,6 +8,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Entity(name = "wallet")
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
