@@ -1,8 +1,8 @@
 package com.wepong.pongdang.dto.response;
 
 import com.wepong.pongdang.entity.GameHistoryEntity;
-import com.wepong.pongdang.entity.PointHistoryEntity;
-import com.wepong.pongdang.entity.enums.GameResult;
+import com.wepong.pongdang.entity.PongHistoryEntity;
+import com.wepong.pongdang.entity.enums.RankType;
 import com.wepong.pongdang.entity.enums.PointHistoryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,7 +46,7 @@ public class HistoryResponseDTO {
 		private String gameUid;
 		private String gameName;
 		private int bettingAmount;
-		private GameResult gameResult;
+		private RankType gameResult;
 		private int pointValue;
 		private LocalDateTime createdAt;
 
@@ -100,7 +100,7 @@ public class HistoryResponseDTO {
 		private LocalDateTime createdAt;
 		private String gameName;
 
-		public static PointDetailResponseDTO from(PointHistoryEntity history) {
+		public static PointDetailResponseDTO from(PongHistoryEntity history) {
 			return PointDetailResponseDTO.builder()
 					.uid(history.getUid())
 					.userUid(history.getUserEntity().getUid())

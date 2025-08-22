@@ -1,5 +1,5 @@
 package com.wepong.pongdang.entity.enums;
 
-public enum GameResult {
-    WIN, LOSE
+public enum DonationType {
+    기타
 }
