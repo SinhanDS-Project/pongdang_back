@@ -12,8 +12,8 @@ import lombok.*;
 public class GameLevelEntity {
 
     @Id
-    @Column(columnDefinition = "CHAR(32)")
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     private Level level;
@@ -22,9 +22,9 @@ public class GameLevelEntity {
     private double probability;
 
     @Column(nullable = false)
-    private double reward;
+    private int entryFee;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_uid")
-    private GameEntity gameEntity;
+    @JoinColumn(name = "game_id")
+    private GameEntity game;
 }

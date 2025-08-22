@@ -1,8 +1,8 @@
 package com.wepong.pongdang.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.wepong.pongdang.entity.enums.QAMainType;
+import com.wepong.pongdang.entity.enums.QASubType;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity(name = "chatbot_qa")
@@ -13,14 +13,14 @@ import lombok.*;
 public class ChatBotQAEntity {
 
     @Id
-    @Column(columnDefinition = "CHAR(32)")
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
-    private String mainCategory;
+    private QAMainType mainCategory;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
-    private String subCategory;
+    private QASubType subCategory;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private String questionText;

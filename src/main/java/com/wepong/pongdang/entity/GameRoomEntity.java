@@ -15,34 +15,28 @@ import java.sql.Date;
 public class GameRoomEntity extends BaseEntity {
 
     @Id
-    @Column(columnDefinition = "CHAR(32)")
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(225)")
     private String title;
-
-    @Column(nullable = false)
-    private int minBet;
 
     @Enumerated(EnumType.STRING)
     private GameRoomStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_level_uid")
-    private GameLevelEntity gameLevelEntity;
+    @JoinColumn(name = "game_level_id")
+    private GameLevelEntity gameLevel;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "host_uid")
-    private UserEntity userEntity;
-
-    @Column
-    private Date startedAt;
+    @JoinColumn(name = "host_id")
+    private UserEntity user;
 
     public void updateStatus(GameRoomStatus status) {
         this.status = status;
     }
 
-    public void updateHost(UserEntity userEntity) {
-        this.userEntity = userEntity;
+    public void updateHost(UserEntity user) {
+        this.user = user;
     }
 }

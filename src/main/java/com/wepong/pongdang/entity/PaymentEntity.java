@@ -15,8 +15,8 @@ import java.sql.Date;
 public class PaymentEntity extends BaseEntity {
 
     @Id
-    @Column(columnDefinition = "CHAR(32)")
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(columnDefinition = "VARCHAR(20)")
     private String payType;
@@ -46,6 +46,6 @@ public class PaymentEntity extends BaseEntity {
     private String receiptUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_uid")
-    private UserEntity userEntity;
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 }

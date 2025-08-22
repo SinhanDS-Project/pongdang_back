@@ -2,7 +2,7 @@ package com.wepong.pongdang.service;
 
 import com.wepong.pongdang.dto.response.HistoryResponseDTO;
 import com.wepong.pongdang.entity.GameHistoryEntity;
-import com.wepong.pongdang.entity.PointHistoryEntity;
+import com.wepong.pongdang.entity.PongHistoryEntity;
 import com.wepong.pongdang.entity.UserEntity;
 import com.wepong.pongdang.entity.enums.PointHistoryType;
 import com.wepong.pongdang.repository.GameHistoryRepository;
@@ -60,7 +60,7 @@ public class HistoryService {
         int size = 10;
         int offset = (page - 1) * size;
         Pageable pageable = PageRequest.of(offset / size, size);
-        Page<PointHistoryEntity> list = pointHistoryRepository.findByUserUid(userId, pageable);
+        Page<PongHistoryEntity> list = pointHistoryRepository.findByUserUid(userId, pageable);
 
         Page<HistoryResponseDTO.PointDetailResponseDTO> details = list.map(HistoryResponseDTO.PointDetailResponseDTO::from);
 
@@ -81,17 +81,17 @@ public class HistoryService {
         gameHistoryRepository.save(history);
     }
 
-    public void insertPointHistory(PointHistoryEntity pointHistoryEntity, String userId) {
+    public void insertPointHistory(PongHistoryEntity pongHistoryEntity, String userId) {
         String uid = UUID.randomUUID().toString().replace("-", "");
         UserEntity userEntity = authService.findByUid(userId);
 
-        PointHistoryEntity history = PointHistoryEntity.builder()
+        PongHistoryEntity history = PongHistoryEntity.builder()
                 .uid(uid)
                 .userEntity(userEntity)
-                .type(pointHistoryEntity.getType())
-                .balanceAfter(pointHistoryEntity.getBalanceAfter())
-                .amount(pointHistoryEntity.getAmount())
-                .gameHistoryEntity(pointHistoryEntity.getGameHistoryEntity())
+                .type(pongHistoryEntity.getType())
+                .balanceAfter(pongHistoryEntity.getBalanceAfter())
+                .amount(pongHistoryEntity.getAmount())
+                .gameHistoryEntity(pongHistoryEntity.getGameHistoryEntity())
                 .build();
 
         pointHistoryRepository.save(history);
@@ -101,7 +101,7 @@ public class HistoryService {
         String uid = UUID.randomUUID().toString().replace("-", "");
         UserEntity userEntity = authService.findByUid(userId);
 
-        PointHistoryEntity history = PointHistoryEntity.builder()
+        PongHistoryEntity history = PongHistoryEntity.builder()
                 .uid(uid)
                 .userEntity(userEntity)
                 .type(PointHistoryType.CHARGE)

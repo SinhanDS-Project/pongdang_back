@@ -1,7 +1,7 @@
 package com.wepong.pongdang.entity;
 
 import com.wepong.pongdang.entity.common.BaseEntity;
-import com.wepong.pongdang.entity.enums.Category;
+import com.wepong.pongdang.entity.enums.BoardType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -14,8 +14,8 @@ import org.hibernate.annotations.ColumnDefault;
 public class BoardEntity extends BaseEntity {
 
     @Id
-    @Column(columnDefinition = "CHAR(32)")
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private String title;
@@ -24,7 +24,7 @@ public class BoardEntity extends BaseEntity {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    private Category category;
+    private BoardType category;
 
     @Column(nullable = false)
     @ColumnDefault("0")
@@ -38,8 +38,8 @@ public class BoardEntity extends BaseEntity {
     private String boardImg;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_uid")
-    private UserEntity userEntity;
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 
     public void incrementViewCount() {
         this.viewCount++;

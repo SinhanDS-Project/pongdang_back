@@ -1,35 +1,30 @@
-package com.wepong.pongdang.entity;
+package com.wepong.pongdang.entity.mapping;
 
+import com.wepong.pongdang.entity.BoardEntity;
+import com.wepong.pongdang.entity.UserEntity;
 import com.wepong.pongdang.entity.common.BaseEntity;
-import com.wepong.pongdang.entity.enums.RankType;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity(name = "game_history")
+@Entity(name = "reply")
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class GameHistoryEntity extends BaseEntity {
+public class ReplyEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private int entryFee;
-
-    @Enumerated(EnumType.STRING)
-    private RankType rank;
-
-    @Column(nullable = false)
-    private int pongValue;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_id")
-    private GameEntity game;
+    @JoinColumn(name = "board_id")
+    private BoardEntity board;
 }

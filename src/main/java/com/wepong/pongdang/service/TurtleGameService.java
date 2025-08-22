@@ -4,9 +4,9 @@ import com.wepong.pongdang.dto.response.GameRoomResponseDTO;
 import com.wepong.pongdang.dto.response.TurtlePlayerDTO;
 import com.wepong.pongdang.entity.GameEntity;
 import com.wepong.pongdang.entity.GameHistoryEntity;
-import com.wepong.pongdang.entity.PointHistoryEntity;
+import com.wepong.pongdang.entity.PongHistoryEntity;
 import com.wepong.pongdang.entity.UserEntity;
-import com.wepong.pongdang.entity.enums.GameResult;
+import com.wepong.pongdang.entity.enums.RankType;
 import com.wepong.pongdang.entity.enums.Level;
 import com.wepong.pongdang.entity.enums.PointHistoryType;
 import com.wepong.pongdang.model.multi.turtle.PlayerDAO;
@@ -164,20 +164,20 @@ public class TurtleGameService {
                     .gameEntity(gameEntity)
                     .bettingAmount(betAmount)
                     .pointValue(Math.abs(winAmount - betAmount))
-                    .gameResult(GameResult.valueOf(gameResult))
+                    .gameResult(RankType.valueOf(gameResult))
                     .build();
 
             historyService.insertGameHistory(gameHistoryEntity, userUid);
 
             // 포인트 히스토리 저장
-            PointHistoryEntity pointHistoryEntity = PointHistoryEntity.builder()
+            PongHistoryEntity pongHistoryEntity = PongHistoryEntity.builder()
                     .gameHistoryEntity(gameHistoryEntity)
                     .type(PointHistoryType.valueOf(gameResult))
                     .amount(Math.abs(winAmount - betAmount))
                     .balanceAfter(userEntity.getPointBalance())
                     .build();
 
-            historyService.insertPointHistory(pointHistoryEntity, userUid);
+            historyService.insertPointHistory(pongHistoryEntity, userUid);
         }
     }
     

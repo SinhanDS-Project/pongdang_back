@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class ChatLogsEntity {
 
     @Id
-    @Column(columnDefinition = "CHAR(32)")
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private String title;
@@ -33,6 +33,6 @@ public class ChatLogsEntity {
     private LocalDateTime responseDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_uid")
-    private UserEntity userEntity;
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 }

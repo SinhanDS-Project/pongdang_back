@@ -2,7 +2,7 @@ package com.wepong.pongdang.controller;
 
 import com.wepong.pongdang.dto.response.HistoryResponseDTO;
 import com.wepong.pongdang.entity.GameHistoryEntity;
-import com.wepong.pongdang.entity.PointHistoryEntity;
+import com.wepong.pongdang.entity.PongHistoryEntity;
 import com.wepong.pongdang.service.AuthService;
 import com.wepong.pongdang.service.HistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class HistoryRestController {
     }
 
     @PostMapping("/point/insert")
-    public ResponseEntity<?> insertPointHistory(@RequestBody PointHistoryEntity pointRequest,
+    public ResponseEntity<?> insertPointHistory(@RequestBody PongHistoryEntity pointRequest,
                                     @RequestHeader("Authorization") String authHeader) {
         String userId = authService.validateAndGetUserId(authHeader);
         historyService.insertPointHistory(pointRequest, userId);

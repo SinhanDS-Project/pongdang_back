@@ -3,7 +3,7 @@ package com.wepong.pongdang.controller;
 import com.wepong.pongdang.dto.response.GameLevelResponseDTO;
 import com.wepong.pongdang.dto.response.GameResponseDTO;
 import com.wepong.pongdang.entity.*;
-import com.wepong.pongdang.entity.enums.GameResult;
+import com.wepong.pongdang.entity.enums.RankType;
 import com.wepong.pongdang.entity.enums.GameType;
 import com.wepong.pongdang.entity.enums.PointHistoryType;
 import com.wepong.pongdang.service.AuthService;
@@ -134,20 +134,20 @@ public class GameRestController {
 				.gameEntity(gameEntity)
 				.bettingAmount(betAmount)
 				.pointValue(winAmount - betAmount)
-				.gameResult(GameResult.valueOf(gameResult))
+				.gameResult(RankType.valueOf(gameResult))
 				.build();
 
 		historyService.insertGameHistory(gameHistoryEntity, uid);
 
 	    // 포인트 히스토리 저장
-	    PointHistoryEntity pointHistoryEntity = PointHistoryEntity.builder()
+	    PongHistoryEntity pongHistoryEntity = PongHistoryEntity.builder()
 				.gameHistoryEntity(gameHistoryEntity)
 				.type(PointHistoryType.valueOf(gameResult))
 				.amount(winAmount - betAmount)
 				.balanceAfter(userEntity.getPointBalance())
 				.build();
 
-	    historyService.insertPointHistory(pointHistoryEntity, uid);
+	    historyService.insertPointHistory(pongHistoryEntity, uid);
 
 	    return ResponseEntity.ok(Map.of("newBalance", userEntity.getPointBalance()));
 	}
@@ -182,20 +182,20 @@ public class GameRestController {
 				.gameEntity(gameEntity)
 				.bettingAmount(betAmount)
 				.pointValue(betAmount)
-				.gameResult(GameResult.valueOf(gameResult))
+				.gameResult(RankType.valueOf(gameResult))
 				.build();
 
 		historyService.insertGameHistory(gameHistoryEntity, uid);
 
 		// 포인트 히스토리 저장
-		PointHistoryEntity pointHistoryEntity = PointHistoryEntity.builder()
+		PongHistoryEntity pongHistoryEntity = PongHistoryEntity.builder()
 				.gameHistoryEntity(gameHistoryEntity)
 				.type(PointHistoryType.valueOf(gameResult))
 				.amount(betAmount)
 				.balanceAfter(userEntity.getPointBalance())
 				.build();
 
-		historyService.insertPointHistory(pointHistoryEntity, uid);
+		historyService.insertPointHistory(pongHistoryEntity, uid);
 
 	    return ResponseEntity.ok(Map.of("newBalance", userEntity.getPointBalance()));
 	}
