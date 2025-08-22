@@ -1,0 +1,50 @@
+server:
+  port: 9090
+
+spring:
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${DB_URL}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    generate-ddl: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.MariaDBDialect
+  security:
+    jwt:
+      secret: ${JWT_SECRET}
+      access-token-expiration: 3600000
+      refresh-token-expiration: 1209600000
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_NAME}
+    password: ${MAIL_PWD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+amazon:
+  region: ap-northeast-2
+  access-key: ${S3_ACCESS}
+  secret-key: ${S3_SECRET}
+  bucket-name: bettopia-s3-bucket
+
+toss:
+  client-key: ${TOSS_CLIENT}
+  secret-key: ${TOSS_SECRET}
