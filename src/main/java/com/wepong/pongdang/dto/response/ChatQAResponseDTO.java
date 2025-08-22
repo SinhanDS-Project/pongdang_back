@@ -1,6 +1,8 @@
 package com.wepong.pongdang.dto.response;
 
 import com.wepong.pongdang.entity.ChatBotQAEntity;
+import com.wepong.pongdang.entity.enums.QAMainType;
+import com.wepong.pongdang.entity.enums.QASubType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,15 +25,15 @@ public class ChatQAResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ChatQADetailDTO {
-        private String uid;
-        private String mainCategory;
-        private String subCategory;
+        private Long id;
+        private QAMainType mainCategory;
+        private QASubType subCategory;
         private String questionText;
         private String answerText;
 
         public static ChatQADetailDTO from(ChatBotQAEntity chatBotQAEntity) {
             return ChatQADetailDTO.builder()
-                    .uid(chatBotQAEntity.getUid())
+                    .id(chatBotQAEntity.getId())
                     .mainCategory(chatBotQAEntity.getMainCategory())
                     .subCategory(chatBotQAEntity.getSubCategory())
                     .questionText(chatBotQAEntity.getQuestionText())

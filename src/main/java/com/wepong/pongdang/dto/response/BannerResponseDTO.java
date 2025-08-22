@@ -27,7 +27,7 @@ public class BannerResponseDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class BannerDetailDTO {
-        private String uid;
+        private Long id;
         private String title;
         @JsonSerialize(using = S3ImageUrlSerializer.class)
         @JsonDeserialize(using = S3ImagePathDeserializer.class)
@@ -37,7 +37,7 @@ public class BannerResponseDTO {
 
         public static BannerDetailDTO from(BannerEntity bannerEntity) {
             return BannerDetailDTO.builder()
-                    .uid(bannerEntity.getUid())
+                    .id(bannerEntity.getId())
                     .title(bannerEntity.getTitle())
                     .imagePath(bannerEntity.getImagePath())
                     .bannerLinkUrl(bannerEntity.getBannerLinkUrl())

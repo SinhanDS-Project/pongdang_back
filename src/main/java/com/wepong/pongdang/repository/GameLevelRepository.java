@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface GameLevelRepository extends JpaRepository<GameLevelEntity, String> {
-    List<GameLevelEntity> findByGameUid(String gameUid);
+public interface GameLevelRepository extends JpaRepository<GameLevelEntity, Long> {
+    List<GameLevelEntity> findByGameId(String gameId);
 }

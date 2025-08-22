@@ -22,41 +22,39 @@ public class ChatLogService {
 	private final ChatLogRepository chatLogRepository;
 	private final AuthService authService;
 
-	public List<ChatLogsEntity> selectByUser(String user_uid) {
-		return chatLogRepository.findByUserUid(user_uid);
+	public List<ChatLogsEntity> selectByUser(Long userId) {
+		return chatLogRepository.findByUserId(userId);
 	}
 	
-	public Page<ChatLogsEntity> selectByUser(String user_uid, int page) {
+	public Page<ChatLogsEntity> selectByUser(Long userId, int page) {
 		int size = 10;
         int offset = (page-1) * size;
 		Pageable pageable = PageRequest.of(offset / size, size);
-		return chatLogRepository.findByUserUid(user_uid, pageable);
+		return chatLogRepository.findByUserId(userId, pageable);
 	}
 	
-	public int chatlogCount(String userId) {
-		return chatLogRepository.countByUserUid(userId);
+	public int chatlogCount(Long userId) {
+		return chatLogRepository.countByUserId(userId);
 	}	
 	
-	public ChatLogsEntity selectByUid(String uid) {
-		return chatLogRepository.findById(uid).orElseThrow(() -> new RuntimeException("채팅이 존재하지 않습니다."));
+	public ChatLogsEntity selectById(Long id) {
+		return chatLogRepository.findById(id).orElseThrow(() -> new RuntimeException("채팅이 존재하지 않습니다."));
 	}
 	
-	public ChatLogsEntity insertChatLog(ChatLogRequestDTO requestChatlog, String userId) {
-		String uid = UUID.randomUUID().toString().replace("-", "");
-		UserEntity userEntity = authService.findByUid(userId);
+	public ChatLogsEntity insertChatLog(ChatLogRequestDTO requestChatlog, Long userId) {
+		UserEntity userEntity = authService.findById(userId);
 
 		ChatLogsEntity chatLog = ChatLogsEntity.builder()
-				.uid(uid)
 				.title(requestChatlog.getTitle())
 				.question(requestChatlog.getQuestion())
-				.userEntity(userEntity)
+				.user(userEntity)
 				.build();
 
 		return chatLogRepository.save(chatLog);
 	}
 	
-	public void deleteLog(String uid) {
-		ChatLogsEntity chat = chatLogRepository.findById(uid).orElseThrow(() -> new RuntimeException("채팅이 존재하지 않습니다."));
+	public void deleteLog(Long id) {
+		ChatLogsEntity chat = chatLogRepository.findById(id).orElseThrow(() -> new RuntimeException("채팅이 존재하지 않습니다."));
 		chatLogRepository.delete(chat);
 	}
 
