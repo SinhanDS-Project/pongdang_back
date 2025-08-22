@@ -23,12 +23,12 @@ public class WalletService {
 
 	public void insertWallet(UserEntity user) {
 		WalletEntity pongWallet = WalletEntity.builder()
-			.type(WalletType.PONG)
+			.walletType(WalletType.PONG)
 			.user(user)
 			.build();
 
 		WalletEntity donaWallet = WalletEntity.builder()
-			.type(WalletType.DONA)
+			.walletType(WalletType.DONA)
 			.user(user)
 			.build();
 
