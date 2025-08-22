@@ -25,25 +25,25 @@ public class ChatLogResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ChatLogDetailDTO {
-        private Long id;
+        private String uid;
         private String title;
         private String question;
         private String response;
         private LocalDateTime chatDate;
         private LocalDateTime responseDate;
-        private Long userId;
+        private String userUid;
         private String nickname;
 
         public static ChatLogDetailDTO from(ChatLogsEntity log) {
             return ChatLogDetailDTO.builder()
-                    .id(log.getId())
+                    .uid(log.getUid())
                     .title(log.getTitle())
                     .question(log.getQuestion())
                     .response(log.getResponse())
                     .chatDate(log.getChatDate())
                     .responseDate(log.getResponseDate())
-                    .userId(log.getUser().getId())
-                    .nickname(log.getUser().getNickname())
+                    .userUid(log.getUserEntity().getUid())
+                    .nickname(log.getUserEntity().getNickname())
                     .build();
         }
     }

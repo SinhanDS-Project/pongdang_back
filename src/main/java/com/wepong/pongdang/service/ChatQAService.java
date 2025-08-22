@@ -30,8 +30,8 @@ public class ChatQAService {
 		return chatQARepository.findByMainCategoryAndSubCategory(main_category, sub_category);
 	}
 
-	public String answerById(Long id) {
-		ChatBotQAEntity chat = chatQARepository.findById(id).orElseThrow(() -> new RuntimeException("질문이 존재하지 않습니다."));
+	public String answerByUid(String uid) {
+		ChatBotQAEntity chat = chatQARepository.findById(uid).orElseThrow(() -> new RuntimeException("질문이 존재하지 않습니다."));
 		return chat.getAnswerText();
 	}
 	

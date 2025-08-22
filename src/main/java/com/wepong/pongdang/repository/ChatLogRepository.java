@@ -9,10 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ChatLogRepository extends JpaRepository<ChatLogsEntity, Long> {
-    int countByUserId(String userId);
+public interface ChatLogRepository extends JpaRepository<ChatLogsEntity, String> {
+    int countByUserUid(String userId);
 
-    List<ChatLogsEntity> findByUserId(String userId);
+    List<ChatLogsEntity> findByUserUid(String userUid);
 
-    Page<ChatLogsEntity> findByUserId(String userId, Pageable pageable);
+    Page<ChatLogsEntity> findByUserUid(String userUid, Pageable pageable);
 }

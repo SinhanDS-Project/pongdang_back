@@ -1,7 +1,7 @@
 package com.wepong.pongdang.dto.response;
 
 import com.wepong.pongdang.entity.BoardEntity;
-import com.wepong.pongdang.entity.enums.BoardType;
+import com.wepong.pongdang.entity.enums.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,9 +26,9 @@ public class BoardResponseDTO {
         /** 전체 페이지 수 */
         private int totalPages;
         /** (선택) 요청한 카테고리 */
-        private BoardType category;
+        private Category category;
 
-        public static BoardListDTO from(Page<BoardDetailDTO> boards, BoardType category) {
+        public static BoardListDTO from(Page<BoardDetailDTO> boards, Category category) {
             return BoardListDTO.builder()
                     .boards(boards)
                     .currentPage(boards.getNumber() + 1)
@@ -45,25 +45,25 @@ public class BoardResponseDTO {
     @AllArgsConstructor
     @Data
     public static class BoardDetailDTO {
-        private Long id;
+        private String uid;
         private String title;
         private String content;
-        private BoardType category;
+        private Category category;
         private int viewCount;
         private int likeCount;
-        private Long userId;
+        private String userUid;
         private String nickname;
 
         public static BoardDetailDTO from(BoardEntity boardEntity) {
             return BoardDetailDTO.builder()
-                    .id(boardEntity.getId())
+                    .uid(boardEntity.getUid())
                     .title(boardEntity.getTitle())
                     .content(boardEntity.getContent())
                     .category(boardEntity.getCategory())
                     .viewCount(boardEntity.getViewCount())
                     .likeCount(boardEntity.getLikeCount())
-                    .userId(boardEntity.getUser().getId())
-                    .nickname(boardEntity.getUser().getNickname())
+                    .userUid(boardEntity.getUserEntity().getUid())
+                    .nickname(boardEntity.getUserEntity().getNickname())
                     .build();
         }
     }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ChatQARepository extends JpaRepository<ChatBotQAEntity, Long> {
+public interface ChatQARepository extends JpaRepository<ChatBotQAEntity, String> {
     List<ChatBotQAEntity> findByMainCategoryAndSubCategory(String mainCategory, String subCategory);
 
     List<ChatBotQAEntity> findByMainCategory(String mainCategory);

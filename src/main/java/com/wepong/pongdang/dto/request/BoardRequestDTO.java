@@ -1,6 +1,6 @@
 package com.wepong.pongdang.dto.request;
 
-import com.wepong.pongdang.entity.enums.BoardType;
+import com.wepong.pongdang.entity.enums.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +15,7 @@ public class BoardRequestDTO {
 	public static class InsertBoardRequestDTO {
 		private String title;
 		private String content;
-	    private BoardType category;
+	    private Category category;
 	    private String boardImg;
 		
 	}
@@ -26,7 +26,7 @@ public class BoardRequestDTO {
 	@Data
 	public static class UpdateBoardRequestDTO {
 		private String content;
-	    private BoardType category;
+	    private Category category;
 	    private String title;
 		
 	}

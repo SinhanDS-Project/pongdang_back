@@ -45,7 +45,7 @@ public class AuthService {
 		Map<String, String> responseToken = new HashMap<>();
 		
 		UserEntity userEntity = userRepository.findByEmail(request.getEmail());
-		AuthTokenEntity token = tokenRepository.findByUserId(userEntity.getId());
+		AuthTokenEntity token = tokenRepository.findByUserUid(userEntity.getUid());
 
 		if (userEntity == null) {
 			throw new UserNotFoundException();
@@ -54,12 +54,13 @@ public class AuthService {
 		}
 
 
-		String accessToken = jwtUtil.generateAccessToken(userEntity.getId());
-		String refreshToken = jwtUtil.generateRefreshToken(userEntity.getId());
+		String accessToken = jwtUtil.generateAccessToken(userEntity.getUid());
+		String refreshToken = jwtUtil.generateRefreshToken(userEntity.getUid());
 
 		if (token == null) {
 			token = AuthTokenEntity.builder()
-					.user(userEntity)
+					.uid(UUID.randomUUID().toString().replace("-", ""))
+					.userEntity(userEntity)
 					.refreshToken(refreshToken)
 					.build();
 		} else {
@@ -84,8 +85,8 @@ public class AuthService {
 		return jwtUtil.generateAccessToken(userId);
 	}
 
-	public UserEntity findById(Long id) {
-		UserEntity userEntity = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException());
+	public UserEntity findByUid(String uid) {
+		UserEntity userEntity = userRepository.findById(uid).orElseThrow(() -> new UserNotFoundException());
 		return userEntity;
 	}
 
@@ -125,6 +126,7 @@ public class AuthService {
     }
     
 		UserEntity userEntity = UserEntity.builder()
+				.uid(UUID.randomUUID().toString().replace("-", ""))
 				.userName(dto.getUserName())
 				.password(passwordEncoder.encode(dto.getPassword()))
 				.nickname(dto.getNickname())
@@ -132,12 +134,13 @@ public class AuthService {
 				.birthDate(birthDate)
 				.phoneNumber(dto.getPhoneNumber())
 				.agreePrivacy(dto.isAgreePrivacy())
+				.pointBalance(100000)
 				.build();
 
 		userRepository.save(userEntity);
 	}
 
-	public void updateUser(UserUpdateRequestDTO userRequest, Long userId) {
+	public void updateUser(UserUpdateRequestDTO userRequest, String userId) {
 		// 기존 정보 조회
 		UserEntity existingUserEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException());
 	    
@@ -195,20 +198,20 @@ public class AuthService {
 	    return url.substring(index + ".amazonaws.com/".length());
 	}
 
-	public void addPoint(int point, Long userId) {
+	public void addPoint(int point, String userId) {
 		UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException());
 		userEntity.addPoint(point);
 		userRepository.save(userEntity);
 	}
 
-	public void losePoint(int point, Long userId) {
+	public void losePoint(int point, String userId) {
 		UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException());
 		userEntity.losePoint(point);
 		userRepository.save(userEntity);
 	}
 
-	public void logout(Long userId) {
-		AuthTokenEntity token = tokenRepository.findByUserId(userId);
+	public void logout(String userId) {
+		AuthTokenEntity token = tokenRepository.findByUserUid(userId);
 		tokenRepository.delete(token);
 	}
 
@@ -217,7 +220,7 @@ public class AuthService {
 		return email;
 	}
 
-	public void updatePassword(Long userId, String password) {
+	public void updatePassword(String userId, String password) {
 		UserEntity userEntity = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException());
 		userEntity.updatePassword(passwordEncoder.encode(password));
 		userRepository.save(userEntity);
