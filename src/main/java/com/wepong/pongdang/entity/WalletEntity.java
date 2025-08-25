@@ -8,6 +8,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Entity(name = "wallet")
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -22,7 +23,7 @@ public class WalletEntity extends BaseEntity {
     private UserEntity user;
 
     @Enumerated(EnumType.STRING)
-    private WalletType type;
+    private WalletType walletType;
 
     @ColumnDefault("0")
     private Long pongBalance;
