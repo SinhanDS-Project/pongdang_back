@@ -18,8 +18,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		// STOMP 연결 엔드포인트는 하나로 관리
 		// 메시지 처리는 각 구독/발행 경로로 관리
-		registry.addEndpoint("/ws/game")
-				.setAllowedOriginPatterns("*")
+		registry.addEndpoint("/ws")
+				.setAllowedOriginPatterns("http://localhost:3000")
 				.withSockJS();
 	}
 
